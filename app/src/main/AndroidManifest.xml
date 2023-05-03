@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FileTransferApp">
-        <activity android:name=".RecieveFiles"
+        <activity android:name=".ReceiveFiles"
                 android:exported="true"></activity>
         <activity
             android:name=".NetworkShare"
