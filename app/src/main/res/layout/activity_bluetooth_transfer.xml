@@ -18,14 +18,12 @@ android:orientation="vertical">
     android:id="@+id/button_GetFile"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:onClick="getFile"
     android:text="Get file from device" />
 
 <Button
     android:id="@+id/button_SendFile"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:onClick="sendViaBluetooth"
     android:text="Send via Bluetooth" />
 
 </LinearLayout>
