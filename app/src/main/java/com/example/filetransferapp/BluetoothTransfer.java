@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 public class BluetoothTransfer extends AppCompatActivity {
 
+
+    //Comment to check if GIT is working
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
