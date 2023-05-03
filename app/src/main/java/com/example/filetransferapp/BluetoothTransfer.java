@@ -22,7 +22,7 @@ public class BluetoothTransfer extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)){
+            if(action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)){
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
                 switch (state)
                 {
@@ -50,6 +50,8 @@ public class BluetoothTransfer extends AppCompatActivity {
                 int status = checkBT();
                 if(status == 1 )
                     Toast.makeText(BluetoothTransfer.this,"Bluetooth is already Turned on!!",Toast.LENGTH_LONG).show();
+                if(status == 0)
+                    Toast.makeText(BluetoothTransfer.this,"Bluetooth Turned on!!",Toast.LENGTH_LONG).show();
             }
         });
     }
