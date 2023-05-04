@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+//import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -43,16 +43,13 @@ public class BluetoothTransfer extends AppCompatActivity {
         Button sendFile = findViewById(R.id.button_SendFile);
         setContentView(R.layout.activity_bluetooth_transfer);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        sendFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG,"Button Clicked!");
-                int status = checkBT();
-                if(status == 1 )
-                    Toast.makeText(BluetoothTransfer.this,"Bluetooth is already Turned on!!",Toast.LENGTH_LONG).show();
-                if(status == 0)
-                    Toast.makeText(BluetoothTransfer.this,"Bluetooth Turned on!!",Toast.LENGTH_LONG).show();
-            }
+        sendFile.setOnClickListener(v -> {
+            Log.d(TAG,"Button Clicked!");
+            int status = checkBT();
+            if(status == 1 )
+                Toast.makeText(BluetoothTransfer.this,"Bluetooth is already Turned on!!",Toast.LENGTH_LONG).show();
+            if(status == 0)
+                Toast.makeText(BluetoothTransfer.this,"Bluetooth Turned on!!",Toast.LENGTH_LONG).show();
         });
     }
     public int checkBT()
