@@ -12,7 +12,7 @@ tools:context=".NetworkShare">
 <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="File Transfer Server"
+    android:text="File Transfer Through IP "
     android:textStyle="bold" />
 
 <TextView
@@ -21,10 +21,23 @@ tools:context=".NetworkShare">
     android:layout_height="wrap_content"
     android:textStyle="italic" />
 
-<TextView
-    android:id="@+id/infoip"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textStyle="italic" />
+    <TextView
+        android:id="@+id/ipName"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/fileName"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:textStyle="italic" />
+
+    <Button
+        android:id="@+id/button_GetFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get file from device"
+        tools:ignore="HardcodedText" />
 
 </LinearLayout>
