@@ -1,43 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical"
-android:paddingBottom="@dimen/activity_vertical_margin"
-android:paddingLeft="@dimen/activity_horizontal_margin"
-android:paddingRight="@dimen/activity_horizontal_margin"
-android:paddingTop="@dimen/activity_vertical_margin"
-tools:context=".NetworkShare">
-<TextView
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="File Transfer Through IP "
-    android:textStyle="bold" />
+    android:layout_height="match_parent"
+    tools:context=".NetworkShare">
 
-<TextView
-    android:id="@+id/infoport"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textStyle="italic" />
-
-    <TextView
-        android:id="@+id/ipName"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:textStyle="italic" />
-
-    <TextView
-        android:id="@+id/fileName"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:textStyle="italic" />
-
-    <Button
-        android:id="@+id/button_GetFile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Get file from device"
-        tools:ignore="HardcodedText" />
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
