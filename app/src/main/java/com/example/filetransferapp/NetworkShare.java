@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.nfc.Tag;
@@ -25,10 +26,8 @@ import java.util.Enumeration;
 
 public class NetworkShare extends AppCompatActivity {
     int reqcode =1;
-    Uri uri;
     String Wifiip;
     String NetIp;
-    int totalFileSize = 0 ;
     private static final String TAG = "NetworkShare";
     //private int PERMISSION_REQUEST_CODE;
     @SuppressLint("SetTextI18n")
@@ -37,27 +36,16 @@ public class NetworkShare extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_share);
         TextView IpAddress = findViewById(R.id.ipName);
-        WifiManager manager=(WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        WifiManager manager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         //noinspection deprecation
-        Wifiip= Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
-        if(!Wifiip.equals("0.0.0.0"))
-            IpAddress.setText("Ip Address: "+ Wifiip);
-        else
-        {
+        Wifiip = Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
+        if (!Wifiip.equals("0.0.0.0"))
+            IpAddress.setText("Ip Address: " + Wifiip);
+        else {
             NetIp = getIpAddress();
-            IpAddress.setText("Ip Address: "+ NetIp);
+            IpAddress.setText("Ip Address: " + NetIp);
         }
         Button getFile = findViewById(R.id.button_GetFile);
-        getFile.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings("deprecation")
-            @Override
-            public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    intent.setType("*/*");
-                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
-                    startActivityForResult(intent,reqcode);
-            }
-        });
     }
     public static String getIpAddress() {
         try {
@@ -75,16 +63,27 @@ public class NetworkShare extends AppCompatActivity {
         }
         return null;
     }
+    public void getFile(View v)
+    {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        //noinspection deprecation
+        startActivityForResult(intent, reqcode);
+    }
 
 
-
+    @SuppressLint("SetTextI18n")
     @Override
     public void onActivityResult(int reqcode, int resultcode, Intent data)
     {
         setContentView(R.layout.activity_network_share);
         TextView FileName= findViewById(R.id.fileName);
+        TextView fileSize = findViewById(R.id.infoport);
+        TextView IpAddress = findViewById(R.id.ipName);
+        long totalFileSize=0;
         super.onActivityResult(reqcode, resultcode, data);
-        if(resultcode == Activity.RESULT_OK)
+        if(reqcode==reqcode && resultcode == Activity.RESULT_OK)
         {
             if(data == null)
                 return;
@@ -93,22 +92,37 @@ public class NetworkShare extends AppCompatActivity {
                 String fileNames = "";
                 for(int i=0; i<data.getClipData().getItemCount();i++)
                 {
-                    uri = data.getClipData().getItemAt(i).getUri();
-                    File selctedToSend = new File(uri.getPath());
-                    totalFileSize+=selctedToSend.length();
+                   Uri uri = data.getClipData().getItemAt(i).getUri();
+                   try{
+                    AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
+                    totalFileSize+=fileDescriptor.getLength();}
+                   catch(Exception e)
+                   {
+                       Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
+                   }
                     fileNames += uri.getPath() + " ";
-                    selctedToSend.deleteOnExit();
                 }
                 Log.d(TAG,"The File Names Are : "+fileNames);
                 Log.d(TAG,"The size of files are : "+totalFileSize);
                 FileName.setText(fileNames);
+                fileSize.setText(totalFileSize+"");
             }
             else
             {
-                uri = data.getData();
-            //    FileName.setText(uri.getPath());
+                Uri uri = data.getData();
+                try{
+                    AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
+                    totalFileSize=fileDescriptor.getLength();}
+                catch(Exception e)
+                {
+                    Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
+                }
+                fileSize.setText(totalFileSize+"");
+                FileName.setText(uri.getPath());
             }
         }
+        NetIp = getIpAddress();
+        IpAddress.setText("Ip Address: " + NetIp);
     }
 
     /*private boolean checkPermission(String[] Permission){
