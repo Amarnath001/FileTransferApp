@@ -1,17 +1,17 @@
 package com.example.filetransferapp;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.widget.Button;
@@ -23,14 +23,14 @@ public class NetworkShare extends AppCompatActivity {
     Uri uri;
     String ip;
     int totalFileSize = 0 ;
+    private static final String TAG = "NetworkShare";
     //private int PERMISSION_REQUEST_CODE;
-    TextView FileName = findViewById(R.id.fileName);
-    TextView IpAddress = findViewById(R.id.ipName);
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_share);
+        TextView IpAddress = findViewById(R.id.ipName);
         WifiManager manager=(WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         //noinspection deprecation
         ip= Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
@@ -50,6 +50,7 @@ public class NetworkShare extends AppCompatActivity {
     @Override
     public void onActivityResult(int reqcode, int resultcode, Intent data)
     {
+        //TextView FileName = findViewById(R.id.fileName);
         super.onActivityResult(reqcode, resultcode, data);
         if(resultcode == Activity.RESULT_OK)
         {
@@ -66,12 +67,14 @@ public class NetworkShare extends AppCompatActivity {
                     fileNames += uri.getPath() + " ";
                     selctedToSend.deleteOnExit();
                 }
-                FileName.setText(fileNames);
+                Log.d(TAG,"The File Names Are : "+fileNames);
+                Log.d(TAG,"The size of files are : "+totalFileSize);
+          //      FileName.setText(fileNames);
             }
             else
             {
                 uri = data.getData();
-                FileName.setText(uri.getPath());
+            //    FileName.setText(uri.getPath());
             }
         }
     }
