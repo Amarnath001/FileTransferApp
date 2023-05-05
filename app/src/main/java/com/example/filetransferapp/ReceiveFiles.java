@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.DataInputStream;
 //import java.io.DataOutputStream;
 import java.io.File;
@@ -50,6 +52,7 @@ public class ReceiveFiles extends AppCompatActivity {
                         @SuppressLint("SetTextI18n")
                         @Override
                         public void run() {
+                            Toast.makeText(ReceiveFiles.this,"Connected to Server!!",Toast.LENGTH_LONG).show();
                             statusTextView.setText("Receiving file...");
                             fileNameTextView.setText(fileName);
                         }
