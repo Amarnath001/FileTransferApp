@@ -15,10 +15,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button sendViaNetwork= findViewById(R.id.NetorkSend);
-        //button= findViewById(R.id.RecFiles);
+        Button recFiles =findViewById(R.id.RecFiles);
 
         sendViaNetwork.setOnClickListener(v -> {
             Intent intent=new Intent(MainActivity.this,NetworkShare.class);
+            startActivity(intent);
+        });
+        recFiles.setOnClickListener(v -> {
+            Intent intent=new Intent(MainActivity.this,ReceiveFiles.class);
             startActivity(intent);
         });
 
