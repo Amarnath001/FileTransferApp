@@ -16,16 +16,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button= findViewById(R.id.NetorkSend);
-        button= findViewById(R.id.RecFiles);
+        Button sendViaNetwork= findViewById(R.id.NetorkSend);
+        //button= findViewById(R.id.RecFiles);
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(MainActivity.this,NetworkShare.class);
-                startActivity(intent);
-
-            }
+        sendViaNetwork.setOnClickListener(v -> {
+            Intent intent=new Intent(MainActivity.this,NetworkShare.class);
+            startActivity(intent);
         });
 
     }
