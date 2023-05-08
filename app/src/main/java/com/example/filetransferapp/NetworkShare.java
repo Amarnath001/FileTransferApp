@@ -49,7 +49,7 @@ public class NetworkShare extends AppCompatActivity {
     ServerSocket serverSocket;
     FileTxThread fileTxThread;
     serverSocketThread ServerSocketThread;
-    ContentResolver res;
+    //ContentResolver res;
     //ServerSocketThread serverSocketThread;
     private static final String TAG = "NetworkShare";
 
@@ -234,7 +234,7 @@ public class NetworkShare extends AppCompatActivity {
                    /* File file = new File(uri.getPath());//create path from uri
                     final String[] split = file.getPath().split(":");//split the path.*/
 
-                   fileNames += GetFileName.getPath(NetworkShare.this,uri)+ " ";
+                   fileNames += GetFileName.getPath(this,uri)+ " ";
                 }
 
                 Log.d(TAG,"The File Names Are : "+fileNames);
