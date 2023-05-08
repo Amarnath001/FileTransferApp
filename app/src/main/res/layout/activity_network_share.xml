@@ -37,4 +37,12 @@
         tools:ignore="HardcodedText"
         android:onClick="getFile"/>
 
+    <Button
+        android:id="@+id/SendFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send FIle "
+        android:onClick="SendFile"
+        tools:ignore="HardcodedText" />
+
 </LinearLayout>
