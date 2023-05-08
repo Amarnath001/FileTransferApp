@@ -4,14 +4,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
@@ -43,6 +49,7 @@ public class NetworkShare extends AppCompatActivity {
     ServerSocket serverSocket;
     FileTxThread fileTxThread;
     serverSocketThread ServerSocketThread;
+    ContentResolver res;
     //ServerSocketThread serverSocketThread;
     private static final String TAG = "NetworkShare";
 
@@ -213,7 +220,8 @@ public class NetworkShare extends AppCompatActivity {
                 String fileNames = "";
                 for(int i=0; i<data.getClipData().getItemCount();i++)
                 {
-                   Uri uri = data.getClipData().getItemAt(i).getUri();
+                    //Intent is = data.getClipData().getItemAt(i).getIntent();
+                     Uri uri = data.getClipData().getItemAt(i).getUri();
                    fileTxThread.setUri(uri);
                    try{
                     AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
@@ -223,8 +231,12 @@ public class NetworkShare extends AppCompatActivity {
                    {
                        Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                    }
-                    fileNames += uri.getPath() + " ";
+                   /* File file = new File(uri.getPath());//create path from uri
+                    final String[] split = file.getPath().split(":");//split the path.*/
+
+                   fileNames += GetFileName.getPath(NetworkShare.this,uri)+ " ";
                 }
+
                 Log.d(TAG,"The File Names Are : "+fileNames);
                 Log.d(TAG,"The size of files are : "+totalFileSize);
                 FileName.setText(fileNames);
@@ -247,21 +259,4 @@ public class NetworkShare extends AppCompatActivity {
         NetIp = getIpAddress();
         IpAddress.setText("Ip Address: " + NetIp);
     }
-
-    /*private boolean checkPermission(String[] Permission){
-        for(int i=0;i<Permission.length;i++){
-            int result= ContextCompat.checkSelfPermission(NetworkShare.this,Permission[i]);
-            if(result== PackageManager.PERMISSION_GRANTED){
-                continue;
-            }
-            else {
-                return false;
-            }
-        }
-        return  true;
-    }
-
-    private  void requestPermission(String[] Permission){
-        ActivityCompat.requestPermissions(NetworkShare.this,Permission, PERMISSION_REQUEST_CODE);
-    }*/
 }
