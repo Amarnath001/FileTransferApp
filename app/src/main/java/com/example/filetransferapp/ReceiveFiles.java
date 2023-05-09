@@ -78,7 +78,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 String filename = dataInputStream.readUTF();
                 File file = new File(
-                        Environment.getExternalStorageDirectory(),
+                        Environment.DIRECTORY_DOWNLOADS,
                         filename);
                 Log.v(TAG,"File named"+file.getName());
                 byte[] bytes = new byte[4096];
