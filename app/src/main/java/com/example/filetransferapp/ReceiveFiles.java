@@ -25,8 +25,9 @@ public class ReceiveFiles extends AppCompatActivity {
     private TextView statusTextView;
     private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
-    //  Thread backRun;
+    Thread backRun;
     public static String TAG = "Receive Files : ";
+
     //public Socket socket;
     @SuppressLint("MissingInflatedId")
     @Override
@@ -36,90 +37,65 @@ public class ReceiveFiles extends AppCompatActivity {
         EditText serverIp = findViewById(R.id.IpServer);
         Button serverConnect = findViewById(R.id.Connect);
         serverConnect.setOnClickListener(v -> {
-            Log.v(TAG,"In On create of rec activity");
+            Log.v(TAG, "In On create of rec activity");
             // Start a new thread to handle the network connection and file transfer
-            ClientRxThread clientRxThread =
-                    new ClientRxThread(
-                            serverIp.getText().toString(),
-                            SERVER_PORT);
-            clientRxThread.start();
+            backRun.start();
         });
-    }
-    private class ClientRxThread extends Thread {
-        String dstAddress;
-        int dstPort;
-        ClientRxThread(String address, int port) {
-            dstAddress = address;
-            dstPort = port;
-            Log.v(TAG,"Add : "+dstAddress+"Port : "+dstPort);
-        }
-        @SuppressLint("SetTextI18n")
-        @Override
-        public void run() {
-            Log.v(TAG,"In Clientrxthread run method!!");
-            Socket socket;
+        backRun = new Thread(() -> {
             try {
-                socket = new Socket(dstAddress,dstPort);
-                if(socket.isConnected())
-                {
-                    ReceiveFiles.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Toast.makeText(ReceiveFiles.this,
-                                    "Connected to host!!",
-                                    Toast.LENGTH_LONG).show();
-                        }});
-
-                }
-                Log.v(TAG,"Socket : "+socket);
-                //assert false;
-                //long fileSize = dataInputStream.readLong();
+                String address = serverIp.getText().toString();
+                // Connect to the server
+                Socket socket = new Socket(address, SERVER_PORT); // The server's IP address
+                // The server's port number
+                // Create a new input stream to receive data from the server
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                String filename = dataInputStream.readUTF();
-                File file = new File(
-                        Environment.DIRECTORY_DOWNLOADS,
-                        filename);
-                Log.v(TAG,"File named"+file.getName());
-                byte[] bytes = new byte[4096];
-                FileOutputStream fos = new FileOutputStream(file);
-                BufferedOutputStream bos = new BufferedOutputStream(fos);
-                while(true) {
-                    int bytesRead = dataInputStream.read(bytes, 0, bytes.length);
-                    if(bytesRead<0)break;
-                    bos.write(bytes, 0, bytesRead);
-                    setContentView(R.layout.activity_recieve_files);
-                    TextView status = findViewById(R.id.status_text_view);
-                    status.setText("The File is being transfered.......");
+
+                String fileName = dataInputStream.readUTF();   /*Read the file name
+                                                           and size from the data input stream */
+                long fileSize = dataInputStream.readLong();
+
+                runOnUiThread(new Runnable() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void run() {
+                        Toast.makeText(ReceiveFiles.this, "Connected to Server!!", Toast.LENGTH_LONG).show();
+                        statusTextView.setText("Receiving file...");
+                        fileNameTextView.setText(fileName);
+                    }
+                });
+
+                byte[] buffer = new byte[4096]; // Create a buffer to hold the file data
+                int bytesRead;
+                int totalBytesRead = 0;
+                File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);/*Creates a new file object to represent the output file
+                                                                                                                                    where the received data will be stored*/
+                FileOutputStream fileOutputStream = new FileOutputStream(outputFile); /*Creates a new file output stream
+                                                                                  to write the received data to the output file*/
+
+                while ((bytesRead = dataInputStream.read(buffer, 0, buffer.length)) != -1) {
+                    fileOutputStream.write(buffer, 0, bytesRead);  //Writes the data read from the input stream to the output stream.
+                    totalBytesRead += bytesRead;
+                    if (totalBytesRead >= fileSize) {  /*Checks if the total number of bytes read so far
+                                                 is equal to or greater than the expected file size*/
+                        break;
+                    }
                 }
-                bos.close();
+
+                // Close the output stream, input stream, and socket connection
+                fileOutputStream.close();
+                dataInputStream.close();
                 socket.close();
 
-                ReceiveFiles.this.runOnUiThread(new Runnable() {
-
+                runOnUiThread(new Runnable() {  // Update the UI TextView to indicate that the file transfer is complete
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                "Finished",
-                                Toast.LENGTH_LONG).show();
-                    }});
-                TextView status = findViewById(R.id.status_text_view);
-                status.setText("The File is Transfered Successfully!!!");
+                        statusTextView.setText("File received!");
+                    }
+                });
             } catch (IOException e) {
-
                 e.printStackTrace();
-
-                final String eMsg = "Something wrong: " + e.getMessage();
-                ReceiveFiles.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                eMsg,
-                                Toast.LENGTH_LONG).show();
-                    }});
-
             }
-        }
+        });
     }
 }
