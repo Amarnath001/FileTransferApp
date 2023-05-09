@@ -11,87 +11,110 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 //import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 
 public class ReceiveFiles extends AppCompatActivity {
     private TextView statusTextView;
     private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
-    Thread backRun;
+  //  Thread backRun;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recieve_files);
-        statusTextView = findViewById(R.id.status_text_view);
-        fileNameTextView = findViewById(R.id.file_name_text_view);
         EditText serverIp = findViewById(R.id.IpServer);
         Button serverConnect = findViewById(R.id.Connect);
         serverConnect.setOnClickListener(v -> {
     // Start a new thread to handle the network connection and file transfer
-        backRun = new Thread(() -> {
-        try {
-            String address = serverIp.getText().toString();
-            // Connect to the server
-            Socket socket = new Socket(address, SERVER_PORT); // The server's IP address
-            // The server's port number
-            // Create a new input stream to receive data from the server
-            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+            ClientRxThread clientRxThread =
+                    new ClientRxThread(
+                            serverIp.getText().toString(),
+                            SERVER_PORT);
 
-            String fileName = dataInputStream.readUTF();   /*Read the file name
-                                                           and size from the data input stream */
-            long fileSize = dataInputStream.readLong();
+            clientRxThread.start();
+        });
+    }
+    private class ClientRxThread extends Thread {
+        String dstAddress;
+        int dstPort;
 
-            runOnUiThread(new Runnable() {
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void run() {
-                    Toast.makeText(ReceiveFiles.this,"Connected to Server!!",Toast.LENGTH_LONG).show();
-                    statusTextView.setText("Receiving file...");
-                    fileNameTextView.setText(fileName);
+        ClientRxThread(String address, int port) {
+            dstAddress = address;
+            dstPort = port;
+        }
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void run() {
+            Socket socket = null;
+
+            try {
+                socket = new Socket(dstAddress, dstPort);
+                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                String fileName = dataInputStream.readUTF();
+                long fileSize = dataInputStream.readLong();
+                File file = new File(
+                        Environment.DIRECTORY_DOWNLOADS,
+                        fileName);
+
+                byte[] bytes = new byte[4096];
+                InputStream is = socket.getInputStream();
+                FileOutputStream fos = new FileOutputStream(file);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                while(true) {
+                    int bytesRead = is.read(bytes, 0, bytes.length);
+                    if(bytesRead<0)break;
+                    bos.write(bytes, 0, bytesRead);
+                    setContentView(R.layout.activity_recieve_files);
+                    TextView status = findViewById(R.id.status_text_view);
+                    status.setText("The File is being transfered.......");
                 }
-            });
+                bos.close();
+                socket.close();
 
-            byte[] buffer = new byte[4096]; // Create a buffer to hold the file data
-            int bytesRead;
-            int totalBytesRead = 0;
-            File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);/*Creates a new file object to represent the output file
-                                                                                                                                    where the received data will be stored*/
-            FileOutputStream fileOutputStream = new FileOutputStream(outputFile); /*Creates a new file output stream
-                                                                                  to write the received data to the output file*/
+                ReceiveFiles.this.runOnUiThread(new Runnable() {
 
-            while ((bytesRead = dataInputStream.read(buffer, 0, buffer.length)) != -1) {
-                fileOutputStream.write(buffer, 0, bytesRead);  //Writes the data read from the input stream to the output stream.
-                totalBytesRead += bytesRead;
-                if (totalBytesRead >= fileSize) {  /*Checks if the total number of bytes read so far
-                                                 is equal to or greater than the expected file size*/
-                    break;
+                    @Override
+                    public void run() {
+                        Toast.makeText(ReceiveFiles.this,
+                                "Finished",
+                                Toast.LENGTH_LONG).show();
+                    }});
+                TextView status = findViewById(R.id.status_text_view);
+                status.setText("The File is Tranfered Successfully!!!");
+            } catch (IOException e) {
+
+                e.printStackTrace();
+
+                final String eMsg = "Something wrong: " + e.getMessage();
+                ReceiveFiles.this.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Toast.makeText(ReceiveFiles.this,
+                                eMsg,
+                                Toast.LENGTH_LONG).show();
+                    }});
+
+            } finally {
+                if(socket != null){
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
-
-            // Close the output stream, input stream, and socket connection
-            fileOutputStream.close();
-            dataInputStream.close();
-            socket.close();
-
-            runOnUiThread(new Runnable() {  // Update the UI TextView to indicate that the file transfer is complete
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void run() {
-                    statusTextView.setText("File received!");
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-    });
-     backRun.start();
-        });
     }
 }

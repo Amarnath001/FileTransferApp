@@ -54,7 +54,8 @@ public class NetworkShare extends AppCompatActivity {
     String NetIp;
     static final int SocketServerPORT = 8080;
     ServerSocket serverSocket;
-    FileTxThread fileTxThread;
+    public static Uri urt;
+    FileTxThread op;
     serverSocketThread ServerSocketThread;
     //ContentResolver res;
     //ServerSocketThread serverSocketThread;
@@ -81,19 +82,23 @@ public class NetworkShare extends AppCompatActivity {
                     public void run() {
                         setContentView(R.layout.activity_network_share);
                         TextView infoport = findViewById(R.id.infoport);
+                        TextView ipAdd  = findViewById(R.id.ipName);
                         infoport.setText("Waiting at : "+serverSocket.getLocalPort());
+                        ipAdd.setText(getIpAddress()+"");
                     }
                 });
                 while(true){
                     Log.v(TAG,"In socket thread while loop");
+                    Log.v(TAG,urt+"");
                     socket = serverSocket.accept();
-                    fileTxThread = new FileTxThread(socket);
-                    fileTxThread.start();
+                    op = new FileTxThread(socket,urt);
+                   // fileTxThread.setUri(urt);
+                    op.start();
                 }
-            }catch (IOException e)
+            } catch (Exception e)
             {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 Log.v(TAG,"In socket thread finally section");
                 if(socket!=null)
                 {
@@ -109,21 +114,16 @@ public class NetworkShare extends AppCompatActivity {
     public class FileTxThread extends Thread{
         Uri uri;
         Socket socket;
-        FileTxThread(Socket socket)
+        FileTxThread(Socket socket,Uri uri)
         {
             Log.v(TAG,"Got socket info: "+socket);
             this.socket=socket;
+            this.uri=uri;
         }
-
-        public void setUri(Uri uri) {
-            Log.v(TAG,"URI is : "+uri.getPath());
-            this.uri = uri;
-        }
-
         @Override
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
-            File file = new File(uri.getPath());
+            File file = new File(Environment.getExternalStorageDirectory(),uri.getPath());
             Log.v(TAG,"File is : "+file);
             byte[] bytes = new byte[(int)file.length()];
             BufferedInputStream bis;
@@ -244,7 +244,7 @@ public class NetworkShare extends AppCompatActivity {
                 }
 
                 Log.d(TAG,"The File Names Are : "+fileNames);
-                Log.d(TAG,"The size of files are : "+totalFileSize);
+                Log.d(TAG,"The size of files are : "+setSize(totalFileSize));
                 FileName.setText(fileNames);
                 fileSize.setText(totalFileSize+"");
             }
@@ -274,7 +274,8 @@ public class NetworkShare extends AppCompatActivity {
                 {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
-                fileSize.setText(totalFileSize+"");
+                urt = uri;
+                fileSize.setText(setSize(totalFileSize)+"");
                 FileName.setText(temp+"");
             }
         }
@@ -304,5 +305,22 @@ public class NetworkShare extends AppCompatActivity {
             outputStream.flush();
         }
         return Uri.fromFile(file);
+    }
+
+    public String setSize(long FileLength)
+    {
+        long tem = 1000000;
+        int count =0;
+        if(FileLength<tem) {
+            FileLength = FileLength / 1000;
+            return FileLength + " Kb";
+        }
+        else {
+            while (tem <= FileLength) {
+                FileLength = FileLength - tem;
+                count++;
+            }
+            return count + " Mb";
+        }
     }
 }
