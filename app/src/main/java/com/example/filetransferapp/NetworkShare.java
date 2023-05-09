@@ -38,6 +38,7 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.nio.BufferUnderflowException;
 import java.util.Enumeration;
 
@@ -222,7 +223,7 @@ public class NetworkShare extends AppCompatActivity {
                 {
                     //Intent is = data.getClipData().getItemAt(i).getIntent();
                      Uri uri = data.getClipData().getItemAt(i).getUri();
-                   fileTxThread.setUri(uri);
+                   //fileTxThread.setUri(uri);
                    try{
                     AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
                     totalFileSize+=fileDescriptor.getLength();
@@ -231,10 +232,7 @@ public class NetworkShare extends AppCompatActivity {
                    {
                        Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                    }
-                   /* File file = new File(uri.getPath());//create path from uri
-                    final String[] split = file.getPath().split(":");//split the path.*/
-
-                   fileNames += GetFileName.getPath(this,uri)+ " ";
+                        fileNames += getPDFPath(uri)+" ";
                 }
 
                 Log.d(TAG,"The File Names Are : "+fileNames);
@@ -253,10 +251,23 @@ public class NetworkShare extends AppCompatActivity {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
                 fileSize.setText(totalFileSize+"");
-                FileName.setText(uri.getPath());
+                String temp = getPDFPath(uri);
+                FileName.setText(temp+"");
             }
         }
         NetIp = getIpAddress();
         IpAddress.setText("Ip Address: " + NetIp);
+    }
+    public String getPDFPath(Uri uri){
+
+        final String id = DocumentsContract.getDocumentId(uri);
+        final Uri contentUri = ContentUris.withAppendedId(
+                Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
+
+        String[] projection = { MediaStore.Images.Media.DATA };
+        @SuppressLint("Recycle") Cursor cursor = getContentResolver().query(contentUri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 }
