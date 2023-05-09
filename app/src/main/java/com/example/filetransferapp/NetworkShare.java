@@ -1,4 +1,5 @@
 package com.example.filetransferapp;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -13,8 +14,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.nfc.Tag;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -30,7 +33,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -41,6 +46,7 @@ import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.nio.BufferUnderflowException;
 import java.util.Enumeration;
+import java.util.Objects;
 
 public class NetworkShare extends AppCompatActivity {
     int reqcode =1;
@@ -202,6 +208,7 @@ public class NetworkShare extends AppCompatActivity {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @SuppressLint("SetTextI18n")
     @Override
     public void onActivityResult(int reqcode, int resultcode, Intent data)
@@ -222,6 +229,7 @@ public class NetworkShare extends AppCompatActivity {
                 for(int i=0; i<data.getClipData().getItemCount();i++)
                 {
                     //Intent is = data.getClipData().getItemAt(i).getIntent();
+                    fileNames = data.getData().getPath();
                      Uri uri = data.getClipData().getItemAt(i).getUri();
                    //fileTxThread.setUri(uri);
                    try{
@@ -230,9 +238,9 @@ public class NetworkShare extends AppCompatActivity {
                    }
                    catch(Exception e)
                    {
-                       Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
+                       Log.d(TAG,"ERROR IN ON ACTIVITY RESULT");
                    }
-                        fileNames += getPDFPath(uri)+" ";
+                        fileNames += fileNames +" ";
                 }
 
                 Log.d(TAG,"The File Names Are : "+fileNames);
@@ -243,6 +251,22 @@ public class NetworkShare extends AppCompatActivity {
             else
             {
                 Uri uri = data.getData();
+                //String temp = data.getData().getPath();
+                String temp = getFileName(uri);
+                try {
+                    uri=getFilePathFromUri(uri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                File file = new File(uri.getPath());
+                if(file.exists())
+                {
+                    Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
+                }
                 try{
                     AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
                     totalFileSize=fileDescriptor.getLength();}
@@ -251,23 +275,34 @@ public class NetworkShare extends AppCompatActivity {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
                 fileSize.setText(totalFileSize+"");
-                String temp = getPDFPath(uri);
                 FileName.setText(temp+"");
             }
         }
         NetIp = getIpAddress();
         IpAddress.setText("Ip Address: " + NetIp);
     }
-    public String getPDFPath(Uri uri){
-
-        final String id = DocumentsContract.getDocumentId(uri);
-        final Uri contentUri = ContentUris.withAppendedId(
-                Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
-
-        String[] projection = { MediaStore.Images.Media.DATA };
-        @SuppressLint("Recycle") Cursor cursor = getContentResolver().query(contentUri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
+    public String getFileName(Uri uri)
+    {
+        @SuppressLint("Recycle") Cursor fileCursor = NetworkShare.this.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+        String fileName = null;
+        if (fileCursor != null && fileCursor.moveToFirst()) {
+            int cIndex = fileCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            if (cIndex != -1) {
+                fileName = fileCursor.getString(cIndex);
+            }
+        }
+        return fileName;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    public Uri getFilePathFromUri(Uri uri) throws IOException {
+        String fileName = getFileName(uri);
+        File file = new File(NetworkShare.this.getExternalCacheDir(), fileName);
+        file.createNewFile();
+        try (OutputStream outputStream = new FileOutputStream(file);
+             InputStream inputStream = NetworkShare.this.getContentResolver().openInputStream(uri)) {
+            FileUtils.copy(inputStream, outputStream); //Simply reads input to output stream
+            outputStream.flush();
+        }
+        return Uri.fromFile(file);
     }
 }
