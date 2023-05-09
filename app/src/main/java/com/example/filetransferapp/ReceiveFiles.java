@@ -39,63 +39,63 @@ public class ReceiveFiles extends AppCompatActivity {
         serverConnect.setOnClickListener(v -> {
             Log.v(TAG, "In On create of rec activity");
             // Start a new thread to handle the network connection and file transfer
-            backRun.start();
-        });
-        backRun = new Thread(() -> {
-            try {
-                String address = serverIp.getText().toString();
-                // Connect to the server
-                Socket socket = new Socket(address, SERVER_PORT); // The server's IP address
-                // The server's port number
-                // Create a new input stream to receive data from the server
-                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+            backRun = new Thread(() -> {
+                try {
+                    String address = serverIp.getText().toString();
+                    // Connect to the server
+                    Socket socket = new Socket(address, SERVER_PORT); // The server's IP address
+                    // The server's port number
+                    // Create a new input stream to receive data from the server
+                    DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
 
-                String fileName = dataInputStream.readUTF();   /*Read the file name
+                    String fileName = dataInputStream.readUTF();   /*Read the file name
                                                            and size from the data input stream */
-                long fileSize = dataInputStream.readLong();
+                    long fileSize = dataInputStream.readLong();
 
-                runOnUiThread(new Runnable() {
-                    @SuppressLint("SetTextI18n")
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this, "Connected to Server!!", Toast.LENGTH_LONG).show();
-                        statusTextView.setText("Receiving file...");
-                        fileNameTextView.setText(fileName);
-                    }
-                });
+                    runOnUiThread(new Runnable() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this, "Connected to Server!!", Toast.LENGTH_LONG).show();
+                            statusTextView.setText("Receiving file...");
+                            fileNameTextView.setText(fileName);
+                        }
+                    });
 
-                byte[] buffer = new byte[4096]; // Create a buffer to hold the file data
-                int bytesRead;
-                int totalBytesRead = 0;
-                File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);/*Creates a new file object to represent the output file
+                    byte[] buffer = new byte[4096]; // Create a buffer to hold the file data
+                    int bytesRead;
+                    int totalBytesRead = 0;
+                    File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);/*Creates a new file object to represent the output file
                                                                                                                                     where the received data will be stored*/
-                FileOutputStream fileOutputStream = new FileOutputStream(outputFile); /*Creates a new file output stream
+                    FileOutputStream fileOutputStream = new FileOutputStream(outputFile); /*Creates a new file output stream
                                                                                   to write the received data to the output file*/
 
-                while ((bytesRead = dataInputStream.read(buffer, 0, buffer.length)) != -1) {
-                    fileOutputStream.write(buffer, 0, bytesRead);  //Writes the data read from the input stream to the output stream.
-                    totalBytesRead += bytesRead;
-                    if (totalBytesRead >= fileSize) {  /*Checks if the total number of bytes read so far
+                    while ((bytesRead = dataInputStream.read(buffer, 0, buffer.length)) != -1) {
+                        fileOutputStream.write(buffer, 0, bytesRead);  //Writes the data read from the input stream to the output stream.
+                        totalBytesRead += bytesRead;
+                        if (totalBytesRead >= fileSize) {  /*Checks if the total number of bytes read so far
                                                  is equal to or greater than the expected file size*/
-                        break;
+                            break;
+                        }
                     }
+
+                    // Close the output stream, input stream, and socket connection
+                    fileOutputStream.close();
+                    dataInputStream.close();
+                    socket.close();
+
+                    runOnUiThread(new Runnable() {  // Update the UI TextView to indicate that the file transfer is complete
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void run() {
+                            statusTextView.setText("File received!");
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                // Close the output stream, input stream, and socket connection
-                fileOutputStream.close();
-                dataInputStream.close();
-                socket.close();
-
-                runOnUiThread(new Runnable() {  // Update the UI TextView to indicate that the file transfer is complete
-                    @SuppressLint("SetTextI18n")
-                    @Override
-                    public void run() {
-                        statusTextView.setText("File received!");
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            });
+            backRun.start();
         });
     }
 }
