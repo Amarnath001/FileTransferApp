@@ -90,9 +90,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 //long fileSize = dataInputStream.readLong();
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 //String filename = dataInputStream.readUTF();
-                File file = new File(
-                        Environment.DIRECTORY_DOWNLOADS,
-                        "TestSend");
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"TestSend");
                 Log.v(TAG,"File named"+file.getName());
                 byte[] bytes = new byte[4096];
                 FileOutputStream fos = new FileOutputStream(file);
