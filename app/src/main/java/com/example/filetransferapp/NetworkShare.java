@@ -57,10 +57,24 @@ public class NetworkShare extends AppCompatActivity {
     public static Uri urt;
     FileTxThread op;
     serverSocketThread ServerSocketThread;
-    //ContentResolver res;
-    //ServerSocketThread serverSocketThread;
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
     private static final String TAG = "NetworkShare";
-
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity,android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
     public void SendFile(View view) {
         ServerSocketThread = new serverSocketThread();
         Log.v(TAG,"In sendfile button");
@@ -123,7 +137,7 @@ public class NetworkShare extends AppCompatActivity {
         @Override
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
-            File file = new File(Environment.getExternalStorageDirectory(),uri.getPath());
+            File file = new File(uri.getPath());
             Log.v(TAG,"File is : "+file);
             byte[] bytes = new byte[(int)file.length()];
             BufferedInputStream bis;
@@ -159,6 +173,7 @@ public class NetworkShare extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_share);
+        verifyStoragePermissions(this);
         TextView IpAddress = findViewById(R.id.ipName);
         WifiManager manager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         //noinspection deprecation
@@ -297,16 +312,23 @@ public class NetworkShare extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public Uri getFilePathFromUri(Uri uri) throws IOException {
         String fileName = getFileName(uri);
-        File file = new File(NetworkShare.this.getExternalCacheDir(), fileName);
+        File file = new File(NetworkShare.this.getFilesDir(), fileName);
         file.createNewFile();
         try (OutputStream outputStream = new FileOutputStream(file);
              InputStream inputStream = NetworkShare.this.getContentResolver().openInputStream(uri)) {
             FileUtils.copy(inputStream, outputStream); //Simply reads input to output stream
             outputStream.flush();
         }
-        return Uri.fromFile(file);
-    }
-
+        /*File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File(sdCard.getAbsolutePath() + "/dir1/dir2");
+        dir.mkdirs();
+        File file1 = new File(dir, fileName);
+        try (FileOutputStream f = new FileOutputStream(file1);
+             InputStream inputStream = NetworkShare.this.getContentResolver().openInputStream(uri)) {
+            FileUtils.copy(inputStream, f);
+            f.flush();*/
+            return Uri.fromFile(file);
+        }
     public String setSize(long FileLength)
     {
         long tem = 1000000;

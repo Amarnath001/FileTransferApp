@@ -1,8 +1,11 @@
 package com.example.filetransferapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -21,18 +24,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
+import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
+
 public class ReceiveFiles extends AppCompatActivity {
     private TextView statusTextView;
     private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
     Thread backRun;
     public static String TAG = "Receive Files : ";
-
+    /*private static String[] PERMISSIONS_STORAGE = {
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    */
     //public Socket socket;
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        verifyStoragePermissions(this);
         setContentView(R.layout.activity_recieve_files);
         EditText serverIp = findViewById(R.id.IpServer);
         Button serverConnect = findViewById(R.id.Connect);
@@ -76,7 +86,7 @@ public class ReceiveFiles extends AppCompatActivity {
                     fileOutputStream.write(buffer, 0, bytesRead);  //Writes the data read from the input stream to the output stream.
                     totalBytesRead += bytesRead;
                     if (totalBytesRead >= fileSize) {  /*Checks if the total number of bytes read so far
-                                                 is equal to or greater than the expected file size*/
+                                                is equal to or greater than the expected file size*/
                         break;
                     }
                 }
