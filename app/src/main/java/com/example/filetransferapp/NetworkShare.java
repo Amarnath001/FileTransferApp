@@ -58,7 +58,7 @@ public class NetworkShare extends AppCompatActivity {
     FileTxThread op;
     serverSocketThread ServerSocketThread;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
@@ -145,14 +145,16 @@ public class NetworkShare extends AppCompatActivity {
                 bis = new BufferedInputStream(new FileInputStream(file));
                 bis.read(bytes,0,bytes.length);
                 OutputStream os = socket.getOutputStream();
+                Log.v(TAG,"IN process of sending!!!!");
                 os.write(bytes,0,bytes.length);
                 os.flush();
+                Log.v(TAG,"File sent!!!");
                 socket.close();
-
                 final String sentMsg = "File Sent to : " + socket.getInetAddress();
                 NetworkShare.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        setContentView(R.layout.activity_network_share);
                         Toast.makeText(NetworkShare.this,sentMsg,Toast.LENGTH_LONG).show();
                     }
                 });

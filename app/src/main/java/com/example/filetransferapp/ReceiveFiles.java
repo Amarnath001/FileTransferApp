@@ -60,7 +60,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 // Create a new input stream to receive data from the server
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
 
-                String fileName = dataInputStream.readUTF();   /*Read the file name
+                String fileName = "DownloadFromServer";  /*Read the file name
                                                            and size from the data input stream */
                 long fileSize = dataInputStream.readLong();
 
@@ -68,7 +68,10 @@ public class ReceiveFiles extends AppCompatActivity {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void run() {
-                        Toast.makeText(ReceiveFiles.this, "Connected to Server!!", Toast.LENGTH_LONG).show();
+                        if(socket.isConnected())
+                            Toast.makeText(ReceiveFiles.this, "Connected to Server!!", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(ReceiveFiles.this, "Error Connecting to Server!!", Toast.LENGTH_LONG).show();
                         statusTextView.setText("Receiving file...");
                         fileNameTextView.setText(fileName);
                     }
@@ -99,7 +102,8 @@ public class ReceiveFiles extends AppCompatActivity {
                 runOnUiThread(new Runnable() {  // Update the UI TextView to indicate that the file transfer is complete
                     @SuppressLint("SetTextI18n")
                     @Override
-                    public void run() {
+                    public void run()
+                    {   Toast.makeText(ReceiveFiles.this, "File Recevied!!", Toast.LENGTH_LONG).show();
                         statusTextView.setText("File received!");
                     }
                 });
