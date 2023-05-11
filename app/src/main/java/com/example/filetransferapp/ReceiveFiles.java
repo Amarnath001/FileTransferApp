@@ -88,20 +88,20 @@ public class ReceiveFiles extends AppCompatActivity {
                 Log.v(TAG,"Socket : "+socket);
                 //assert false;
                 //long fileSize = dataInputStream.readLong();
-                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                //DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 //String filename = dataInputStream.readUTF();
-                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"TestSend");
+                InputStream is = socket.getInputStream();
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"TestSend.pdf");
                 Log.v(TAG,"File named"+file.getName());
+                int total;
                 byte[] bytes = new byte[4096];
                 FileOutputStream fos = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                 while(true) {
-                    int bytesRead = dataInputStream.read(bytes, 0, bytes.length);
+                    int bytesRead = is.read(bytes, 0, bytes.length);
                     if(bytesRead<0)break;
                     bos.write(bytes, 0, bytesRead);
-
                     ReceiveFiles.this.runOnUiThread(new Runnable() {
-
                         @Override
                         public void run() {
                             setContentView(R.layout.activity_recieve_files);
