@@ -177,10 +177,11 @@ public class ReceiveFiles extends AppCompatActivity {
                     }});
                 System.out.println("Receiving file: " + files.get(i).getName());
                 //create a new fileoutputstream for each new file
-                String filename = dis.readUTF();
+                //String filename = dis.readUTF();
+                System.out.println("UTF File name is : "+dis.readUTF());
                 long fileSize = dis.readLong();
-                File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),filename);
-                in.createNewFile();
+                File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),files.get(i).getName());
+                //in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
                 while (fileSize > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, fileSize))) != -1)
