@@ -198,6 +198,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 {
                     fos.write(buf,0,n);
                     fsize-=n;
+                    break;
                 }
                 fos.close();
             }
