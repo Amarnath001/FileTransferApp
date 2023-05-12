@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
 
@@ -157,12 +158,19 @@ public class ReceiveFiles extends AppCompatActivity {
 //read the number of files from the client
             int number = dis.readInt();
             ArrayList<File>files = new ArrayList<File>(number);
+            long FileSize[] = new long[number];
             System.out.println("Number of Files to be received: " +number);
             //read file names, add files to arraylist
             for(int i = 0; i< number;i++){
                 File file = new File(dis.readUTF());
                 files.add(file);
             }
+            System.out.println("FILE LIST IN CLIENT SIDE : " +files);
+            for(int i=0;i<number;i++)
+            {
+                FileSize[i]= dis.readLong();
+            }
+            System.out.println("FILE LIST (SIZES) IN CLIENT SIDE : " + Arrays.toString(FileSize));
             int n = 0;
             byte[]buf = new byte[4092];
             //outer loop, executes one for each file
@@ -178,17 +186,15 @@ public class ReceiveFiles extends AppCompatActivity {
                 System.out.println("Receiving file: " + files.get(i).getName());
                 //create a new fileoutputstream for each new file
                 //String filename = dis.readUTF();
-                System.out.println("UTF File name is : "+dis.readUTF());
-                long fileSize = dis.readLong();
-                System.out.println("FILE SIZES : "+fileSize);
+               // System.out.println("UTF File name is : "+dis.readUTF());
+                //System.out.println("FILE SIZES : "+fileSize);
                 File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),files.get(i).getName());
                 //in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
-                while (fileSize > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, fileSize))) != -1)
+                while (FileSize[i] > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, FileSize[i]))) != -1)
                 {
                     fos.write(buf,0,n);
-                    fileSize -= n;
                 }
                 fos.close();
             }

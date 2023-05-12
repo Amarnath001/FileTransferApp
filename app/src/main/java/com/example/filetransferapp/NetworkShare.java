@@ -42,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -459,7 +460,8 @@ public class NetworkShare extends AppCompatActivity {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             //System.out.println(files.size());
-//write the number of files to the server
+            long Filesizes[]=new long[10];
+            //write the number of files to the server
             dos.writeInt(files.size());
             Log.d(TAG,"File Size (dos.writeLong) : "+ files.size());
             dos.flush();
@@ -469,9 +471,10 @@ public class NetworkShare extends AppCompatActivity {
                 dos.flush();
             }
             //write file sizes
-            for(int i = 0 ; i<files.size();i++)
+            for(int i=0;i< files.size();i++)
             {
                 dos.writeLong(files.get(i).length());
+                System.out.println("File SIZE is : "+files.get(i).length());
                 dos.flush();
             }
             //buffer for file writing, to declare inside or outside loop?
@@ -479,11 +482,10 @@ public class NetworkShare extends AppCompatActivity {
             byte[]buf = new byte[4092];
             //outer loop, executes one for each file
             for(int i =0; i < files.size(); i++){
-
+                System.out.println(files.get(i).length());
                 System.out.println(files.get(i).getName());
                 //create new fileinputstream for each file
                 FileInputStream fis = new FileInputStream(files.get(i));
-
                 //write file to dos
                 while((n =fis.read(buf)) != -1){
                     dos.write(buf,0,n);
