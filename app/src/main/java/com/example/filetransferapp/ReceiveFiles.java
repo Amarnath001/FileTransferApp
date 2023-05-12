@@ -175,11 +175,12 @@ public class ReceiveFiles extends AppCompatActivity {
                                 "FILE RECEIVING IS : "+files.get(finalI).getName(),
                                 Toast.LENGTH_LONG).show();
                     }});
-                //System.out.println("Receiving file: " + files.get(i).getName());
+                System.out.println("Receiving file: " + files.get(i).getName());
                 //create a new fileoutputstream for each new file
                 String filename = dis.readUTF();
                 long fileSize = dis.readLong();
                 File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),filename);
+                in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
                 while (fileSize > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, fileSize))) != -1)
