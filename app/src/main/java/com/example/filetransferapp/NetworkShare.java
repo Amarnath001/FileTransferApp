@@ -30,6 +30,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -45,6 +48,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.nio.BufferUnderflowException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Objects;
 
@@ -57,11 +61,13 @@ public class NetworkShare extends AppCompatActivity {
     public static Uri urt;
     FileTxThread op;
     serverSocketThread ServerSocketThread;
+    ipTransfer IpTransferThread;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static final String[] PERMISSIONS_STORAGE = {
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+    public ArrayList<File> FileList = new ArrayList<>();
     private static final String TAG = "NetworkShare";
     public static void verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
@@ -76,12 +82,53 @@ public class NetworkShare extends AppCompatActivity {
         }
     }
     public void SendFile(View view) {
-        ServerSocketThread = new serverSocketThread();
+       // ServerSocketThread = new serverSocketThread();
         Log.v(TAG,"In sendfile button");
-        ServerSocketThread.start();
-
+        IpTransferThread = new ipTransfer();
+        //ServerSocketThread.start();
+        IpTransferThread.start();
     }
-
+    public class ipTransfer extends Thread {
+        @Override
+        public void run() {
+            Socket socket = null;
+            try {
+                Log.v(TAG, "In IPtransfer thread run!!!");
+                serverSocket = new ServerSocket(SocketServerPORT);
+                NetworkShare.this.runOnUiThread(new Runnable() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void run() {
+                        setContentView(R.layout.activity_network_share);
+                        TextView infoport = findViewById(R.id.infoport);
+                        TextView ipAdd = findViewById(R.id.ipName);
+                        infoport.setText("Waiting at : " + serverSocket.getLocalPort());
+                        ipAdd.setText(getIpAddress() + "");
+                    }
+                });
+                while(true){
+                    Log.v(TAG,"In socket thread while loop");
+                    Log.v(TAG,urt+"");
+                    socket = serverSocket.accept();
+                    op = new FileTxThread(socket,FileList);
+                    // fileTxThread.setUri(urt);
+                    op.start();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                Log.v(TAG,"In IpTransfer thread finally section");
+                if(socket!=null)
+                {
+                    try {
+                        socket.close();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
     //private int PERMISSION_REQUEST_CODE;
     public class serverSocketThread extends Thread {
 
@@ -128,13 +175,19 @@ public class NetworkShare extends AppCompatActivity {
     public class FileTxThread extends Thread{
         Uri uri;
         Socket socket;
+        ArrayList<File> ftlist;
         FileTxThread(Socket socket,Uri uri)
         {
             Log.v(TAG,"Got socket info: "+socket);
             this.socket=socket;
             this.uri=uri;
         }
-        @Override
+        FileTxThread(Socket socket,ArrayList<File> ft)
+        {
+            this.socket=socket;
+            ftlist.addAll(ft);
+        }
+        /*@Override
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
             File file = new File(uri.getPath());
@@ -168,6 +221,12 @@ public class NetworkShare extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+        }*/
+
+        @Override
+        public void run() {
+            Log.v(TAG,"In FileTXthread run!!!");
+            send(ftlist,socket);
         }
     }
     @SuppressLint("SetTextI18n")
@@ -276,6 +335,8 @@ public class NetworkShare extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 File file = new File(uri.getPath());
+                FileList.add(file);
+                Log.v(TAG,""+FileList);
                 if(file.exists())
                 {
                     Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
@@ -345,6 +406,51 @@ public class NetworkShare extends AppCompatActivity {
                 count++;
             }
             return count + " Mb";
+        }
+    }
+    public void send(ArrayList<File> files, Socket socket){
+        try {
+            DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            //System.out.println(files.size());
+//write the number of files to the server
+            dos.writeInt(files.size());
+            Log.d(TAG,"File Size (dos.writeLong) : "+ files.size());
+            dos.flush();
+            //write file names
+            for(int i = 0 ; i < files.size();i++){
+                dos.writeUTF(files.get(i).getName());
+                dos.flush();
+            }
+            //write file sizes
+            for(int i = 0 ; i<files.size();i++)
+            {
+                dos.writeLong(files.get(i).length());
+                dos.flush();
+            }
+            //buffer for file writing, to declare inside or outside loop?
+            int n = 0;
+            byte[]buf = new byte[4092];
+            //outer loop, executes one for each file
+            for(int i =0; i < files.size(); i++){
+
+                System.out.println(files.get(i).getName());
+                //create new fileinputstream for each file
+                FileInputStream fis = new FileInputStream(files.get(i));
+
+                //write file to dos
+                while((n =fis.read(buf)) != -1){
+                    dos.write(buf,0,n);
+                    dos.flush();
+
+                }
+                //should i close the dataoutputstream here and make a new one each time?
+            }
+            //or is this good?
+            dos.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }
