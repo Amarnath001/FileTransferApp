@@ -5,8 +5,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -333,17 +335,6 @@ public class NetworkShare extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                File file = new File(uri.getPath());
-                FileList.add(file);
-                Log.v(TAG,""+FileList);
-                if(file.exists())
-                {
-                    Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
-                }
-                else
-                {
-                    Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
-                }
                 try{
                     AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
                     totalFileSize=fileDescriptor.getLength();}
@@ -352,12 +343,66 @@ public class NetworkShare extends AppCompatActivity {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
                 urt = uri;
-                fileSize.setText(setSize(totalFileSize)+"");
-                FileName.setText(temp+"");
+                if(totalFileSize>200000)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(NetworkShare.this);
+                    // Set the message show for the Alert time
+                    builder.setMessage("FILE SIZE EXCEEDED SET LIMITS WANT TO CONTINUE?");
+                    // Set Alert Title
+                    builder.setTitle("Alert !");
+                    // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+                    builder.setCancelable(false);
+                    // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
+                    long finalTotalFileSize = totalFileSize;
+                    Uri finalUri = uri;
+                    builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
+                        // When the user click yes button then app will close
+                        fileSize.setText(setSize(finalTotalFileSize)+"");
+                        FileName.setText(temp+"");
+                        NetIp = getIpAddress();
+                        IpAddress.setText("Ip Address: " + NetIp);
+                        File file = new File(finalUri.getPath());
+                        FileList.add(file);
+                        Log.v(TAG,""+FileList);
+                        if(file.exists())
+                        {
+                            Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
+                        }
+                        else
+                        {
+                            Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
+                        }
+                        //finish();
+                    });
+                    // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
+                    builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                        // If user click no then dialog box is canceled.
+                        dialog.cancel();
+                    });
+                    // Create the Alert dialog
+                    AlertDialog alertDialog = builder.create();
+                    // Show the Alert Dialog box
+                    alertDialog.show();
+                }
+                else{
+                    fileSize.setText(setSize(totalFileSize)+"");
+                    FileName.setText(temp+"");
+                    File file = new File(uri.getPath());
+                    FileList.add(file);
+                    Log.v(TAG,""+FileList);
+                    if(file.exists())
+                    {
+                        Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
+                    }
+                    NetIp = getIpAddress();
+                    IpAddress.setText("Ip Address: " + NetIp);
+                }
             }
         }
-        NetIp = getIpAddress();
-        IpAddress.setText("Ip Address: " + NetIp);
     }
     public String getFileName(Uri uri)
     {
