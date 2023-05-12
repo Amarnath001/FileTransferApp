@@ -194,10 +194,10 @@ public class ReceiveFiles extends AppCompatActivity {
                 //in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
-                while (fsize > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, fsize))) != -1)
+                while (FileSize[i] > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, FileSize[i]))) != -1)
                 {
                     fos.write(buf,0,n);
-                    fsize-=n;
+                    //fsize-=n;
                     break;
                 }
                 fos.close();
