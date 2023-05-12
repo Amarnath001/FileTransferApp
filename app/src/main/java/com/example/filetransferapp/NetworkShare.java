@@ -175,7 +175,7 @@ public class NetworkShare extends AppCompatActivity {
     public class FileTxThread extends Thread{
         Uri uri;
         Socket socket;
-        ArrayList<File> ftlist;
+        ArrayList<File> ftlist = new ArrayList<>();
         FileTxThread(Socket socket,Uri uri)
         {
             Log.v(TAG,"Got socket info: "+socket);
@@ -222,7 +222,6 @@ public class NetworkShare extends AppCompatActivity {
                 }
             }
         }*/
-
         @Override
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");

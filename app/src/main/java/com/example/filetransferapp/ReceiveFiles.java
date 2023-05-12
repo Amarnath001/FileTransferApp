@@ -180,7 +180,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 String filename = dis.readUTF();
                 long fileSize = dis.readLong();
                 File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),filename);
-                FileOutputStream fos = new FileOutputStream(filename);
+                FileOutputStream fos = new FileOutputStream(in);
                 //read file
                 while (fileSize > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, fileSize))) != -1)
                 {
