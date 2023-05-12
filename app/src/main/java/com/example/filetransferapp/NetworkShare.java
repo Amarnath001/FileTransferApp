@@ -87,8 +87,38 @@ public class NetworkShare extends AppCompatActivity {
        // ServerSocketThread = new serverSocketThread();
         Log.v(TAG,"In sendfile button");
         IpTransferThread = new ipTransfer();
+        long totalSendSize=0;
+        for(int i=0;i<FileList.size();i++)
+        {
+            totalSendSize = FileList.get(i).length();
+        }
+        if(totalSendSize>200000)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(NetworkShare.this);
+            // Set the message show for the Alert time
+            builder.setMessage("FILE SIZE LIMIT EXCEEDED, DO YOU WANT TO CONTINUE?");
+            // Set Alert Title
+            builder.setTitle("Alert !");
+            // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+            builder.setCancelable(false);
+            // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
+            builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
+                // When the user click yes button then app will close
+                IpTransferThread.start();
+            });
+            // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
+            builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                // If user click no then dialog box is canceled.
+                dialog.cancel();
+            });
+            // Create the Alert dialog
+            AlertDialog alertDialog = builder.create();
+            // Show the Alert Dialog box
+            alertDialog.show();
+        }
+        else{
         //ServerSocketThread.start();
-        IpTransferThread.start();
+        IpTransferThread.start();}
     }
     public class ipTransfer extends Thread {
         @Override
@@ -298,32 +328,47 @@ public class NetworkShare extends AppCompatActivity {
         super.onActivityResult(reqcode, resultcode, data);
         if(reqcode==reqcode && resultcode == Activity.RESULT_OK)
         {
+            String fileNames = "";
             if(data == null)
                 return;
             if(null!= data.getClipData())
             {
-                String fileNames = "";
-                for(int i=0; i<data.getClipData().getItemCount();i++)
-                {
+                for(int i=0; i<data.getClipData().getItemCount();i++) {
                     //Intent is = data.getClipData().getItemAt(i).getIntent();
-                    fileNames = data.getData().getPath();
-                     Uri uri = data.getClipData().getItemAt(i).getUri();
-                   //fileTxThread.setUri(uri);
-                   try{
-                    AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
-                    totalFileSize+=fileDescriptor.getLength();
-                   }
-                   catch(Exception e)
-                   {
-                       Log.d(TAG,"ERROR IN ON ACTIVITY RESULT");
-                   }
-                        fileNames += fileNames +" ";
+                    //fileNames = data.getData().getPath();
+                    Uri uri = data.getClipData().getItemAt(i).getUri();
+                    fileNames += getFileName(uri) + ",  ";
+                    try {
+                        uri = getFilePathFromUri(uri);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri, "r");
+                        totalFileSize += fileDescriptor.getLength();
+                    }
+                    //System.out.println("FILENAMES ARE : "+fileNames);
+                    //fileTxThread.setUri(uri);
+                    catch (Exception e) {
+                        Log.d(TAG, "ERROR IN ON ACTIVITY RESULT");
+                    }
+                    urt = uri;
+                    //uri = getFilePathFromUri(uri);
+                    File file = new File(urt.getPath());
+                    FileList.add(file);
+                    Log.v(TAG, "" + FileList);
+                    if (file.exists()) {
+                        Toast.makeText(NetworkShare.this, "The file is found : " + file.getName(), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(NetworkShare.this, "FILE NOT FOUND!!! ", Toast.LENGTH_LONG).show();
+                    }
                 }
-
-                Log.d(TAG,"The File Names Are : "+fileNames);
-                Log.d(TAG,"The size of files are : "+setSize(totalFileSize));
-                FileName.setText(fileNames);
-                fileSize.setText(totalFileSize+"");
+                System.out.println(FileList);
+                Log.d(TAG, "The File Names Are : " + fileNames);
+                Log.d(TAG, "The size of files are : " + setSize(totalFileSize));
+                FileName.setText("The File Selected Are : " + fileNames);
+                fileSize.setText(setSize(totalFileSize) + "");
+                IpAddress.setText(getIpAddress());
             }
             else
             {
@@ -343,64 +388,21 @@ public class NetworkShare extends AppCompatActivity {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
                 urt = uri;
-                if(totalFileSize>200000)
+                fileSize.setText(setSize(totalFileSize)+"");
+                FileName.setText(temp+"");
+                File file = new File(uri.getPath());
+                FileList.add(file);
+                Log.v(TAG,""+FileList);
+                if(file.exists())
                 {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(NetworkShare.this);
-                    // Set the message show for the Alert time
-                    builder.setMessage("FILE SIZE EXCEEDED SET LIMITS WANT TO CONTINUE?");
-                    // Set Alert Title
-                    builder.setTitle("Alert !");
-                    // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
-                    builder.setCancelable(false);
-                    // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
-                    long finalTotalFileSize = totalFileSize;
-                    Uri finalUri = uri;
-                    builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
-                        // When the user click yes button then app will close
-                        fileSize.setText(setSize(finalTotalFileSize)+"");
-                        FileName.setText(temp+"");
-                        NetIp = getIpAddress();
-                        IpAddress.setText("Ip Address: " + NetIp);
-                        File file = new File(finalUri.getPath());
-                        FileList.add(file);
-                        Log.v(TAG,""+FileList);
-                        if(file.exists())
-                        {
-                            Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
-                        }
-                        else
-                        {
-                            Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
-                        }
-                        //finish();
-                    });
-                    // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
-                    builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
-                        // If user click no then dialog box is canceled.
-                        dialog.cancel();
-                    });
-                    // Create the Alert dialog
-                    AlertDialog alertDialog = builder.create();
-                    // Show the Alert Dialog box
-                    alertDialog.show();
+                    Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
                 }
-                else{
-                    fileSize.setText(setSize(totalFileSize)+"");
-                    FileName.setText(temp+"");
-                    File file = new File(uri.getPath());
-                    FileList.add(file);
-                    Log.v(TAG,""+FileList);
-                    if(file.exists())
-                    {
-                        Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
-                    }
-                    else
+                else
                     {
                         Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
                     }
-                    NetIp = getIpAddress();
-                    IpAddress.setText("Ip Address: " + NetIp);
-                }
+                NetIp = getIpAddress();
+                IpAddress.setText("Ip Address: " + NetIp);
             }
         }
     }
