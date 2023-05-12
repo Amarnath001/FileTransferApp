@@ -157,6 +157,7 @@ public class ReceiveFiles extends AppCompatActivity {
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 //read the number of files from the client
             int number = dis.readInt();
+            long fsize=0;
             ArrayList<File>files = new ArrayList<File>(number);
             long FileSize[] = new long[number];
             System.out.println("Number of Files to be received: " +number);
@@ -169,6 +170,7 @@ public class ReceiveFiles extends AppCompatActivity {
             for(int i=0;i<number;i++)
             {
                 FileSize[i]= dis.readLong();
+                fsize+=FileSize[i];
             }
             System.out.println("FILE LIST (SIZES) IN CLIENT SIDE : " + Arrays.toString(FileSize));
             int n = 0;
@@ -192,9 +194,10 @@ public class ReceiveFiles extends AppCompatActivity {
                 //in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
-                while (FileSize[i] > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, FileSize[i]))) != -1)
+                while (fsize > 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, fsize))) != -1)
                 {
                     fos.write(buf,0,n);
+                    fsize-=n;
                 }
                 fos.close();
             }
