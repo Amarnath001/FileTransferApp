@@ -180,6 +180,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 //String filename = dis.readUTF();
                 System.out.println("UTF File name is : "+dis.readUTF());
                 long fileSize = dis.readLong();
+                System.out.println("FILE SIZES : "+fileSize);
                 File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),files.get(i).getName());
                 //in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
