@@ -30,25 +30,26 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
+//import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
 
 public class ReceiveFiles extends AppCompatActivity {
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
     //private TextView statusTextView;
     //private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
     Thread backRun;
     public static String TAG = "Receive Files : ";
-    /*private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-    */
+
     //public Socket socket;
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        verifyStoragePermissions(this);
+        verifyStoragePermissions(ReceiveFiles.this);
         setContentView(R.layout.activity_recieve_files);
         EditText serverIp = findViewById(R.id.IpServer);
         Button serverConnect = findViewById(R.id.Connect);
@@ -64,6 +65,19 @@ public class ReceiveFiles extends AppCompatActivity {
                 clientRxThread.start();
             });
     }
+
+    private void verifyStoragePermissions(Activity activity) {
+        int permission = ActivityCompat.checkSelfPermission(activity,android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
     private class ClientRxThread extends Thread {
         String dstAddress;
         int dstPort;
@@ -155,6 +169,7 @@ public class ReceiveFiles extends AppCompatActivity {
         try {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            verifyStoragePermissions(this);
 //read the number of files from the client
             int number = dis.readInt();
             long fsize=0;
@@ -191,7 +206,7 @@ public class ReceiveFiles extends AppCompatActivity {
                // System.out.println("UTF File name is : "+dis.readUTF());
                 //System.out.println("FILE SIZES : "+fileSize);
                 File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),files.get(i).getName());
-                //in.createNewFile();
+                in.createNewFile();
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
                 while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, FileSize[i]))) != -1)
