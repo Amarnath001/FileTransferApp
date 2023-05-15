@@ -206,7 +206,31 @@ public class ReceiveFiles extends AppCompatActivity {
                // System.out.println("UTF File name is : "+dis.readUTF());
                 //System.out.println("FILE SIZES : "+fileSize);
                 File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),files.get(i).getName());
-                in.createNewFile();
+                //in.createNewFile();
+                if(in.exists())
+                {
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "FILE EXISTS : "+in.getName(),
+                                    Toast.LENGTH_LONG).show();
+                        }});
+
+                }
+                else
+                {
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "FILE DOES NOT EXIST!!!!",
+                                    Toast.LENGTH_LONG).show();
+                        }});
+                    in.createNewFile();
+                }
                 FileOutputStream fos = new FileOutputStream(in);
                 //read file
                 while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, FileSize[i]))) != -1)
