@@ -1,10 +1,11 @@
 package com.example.filetransferapp;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,9 +30,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 //import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
-
 public class ReceiveFiles extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     //private TextView statusTextView;
@@ -172,77 +171,125 @@ public class ReceiveFiles extends AppCompatActivity {
             verifyStoragePermissions(this);
 //read the number of files from the client
             int number = dis.readInt();
-            long fsize=0;
+            int ign[]=new int[number];
+            for(int j = 0 ;j<number;j++)
+            {
+                ign[j]=1;
+            }
             ArrayList<File>files = new ArrayList<File>(number);
             long FileSize[] = new long[number];
             System.out.println("Number of Files to be received: " +number);
             //read file names, add files to arraylist
             for(int i = 0; i< number;i++){
-                File file = new File(dis.readUTF());
-                files.add(file);
+                String temp = dis.readUTF();
+                if(checkFile(temp)==1)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ReceiveFiles.this);
+                    // Set the message show for the Alert time
+                    builder.setMessage("FILE IS ALREADY PRESENT, DO YOU WANT TO CONTINUE?(WILL OVERWRITE IT)");
+                    // Set Alert Title
+                    builder.setTitle("Alert !");
+                    // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+                    builder.setCancelable(false);
+                    // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
+                    builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
+                        // When the user click yes button then app will close
+                        File file = null;
+                        try {
+                            file = new File(dis.readUTF());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        files.add(file);
+                    });
+                    // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
+                    int finalI = i;
+                    builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                        // If user click no then dialog box is canceled.
+                        ReceiveFiles.this.runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                Toast.makeText(ReceiveFiles.this,
+                                        "FILE: "+ temp + " Will be Ignored!!!",
+                                        Toast.LENGTH_LONG).show();
+                            }});
+                        ign[finalI]=0;
+                        dialog.cancel();
+                    });
+                    // Create the Alert dialog
+                    AlertDialog alertDialog = builder.create();
+                    // Show the Alert Dialog box
+                    alertDialog.show();
+                }
+                else{
+                    File file = new File(dis.readUTF());
+                    files.add(file);
+                }
+                    //File file = new File(dis.readUTF());
+                //files.add(file);
             }
             System.out.println("FILE LIST IN CLIENT SIDE : " +files);
             for(int i=0;i<number;i++)
             {
+
                 FileSize[i]= dis.readLong();
-                fsize+=FileSize[i];
+
             }
             System.out.println("FILE LIST (SIZES) IN CLIENT SIDE : " + Arrays.toString(FileSize));
             int n = 0;
             byte[]buf = new byte[4092];
             //outer loop, executes one for each file
             for(int i = 0; i < files.size();i++){
-                int finalI = i;
-                ReceiveFiles.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                "FILE RECEIVING IS : "+files.get(finalI).getName(),
-                                Toast.LENGTH_LONG).show();
-                    }});
-                System.out.println("Receiving file: " + files.get(i).getName());
-                //create a new fileoutputstream for each new file
-                //String filename = dis.readUTF();
-               // System.out.println("UTF File name is : "+dis.readUTF());
-                //System.out.println("FILE SIZES : "+fileSize);
-                File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),files.get(i).getName());
-                //in.createNewFile();
-                if(in.exists())
-                {
+                if(ign[i]==1) {
+                    int finalI = i;
                     ReceiveFiles.this.runOnUiThread(new Runnable() {
-
                         @Override
                         public void run() {
                             Toast.makeText(ReceiveFiles.this,
-                                    "FILE EXISTS : "+in.getName(),
+                                    "FILE RECEIVING IS : " + files.get(finalI).getName(),
                                     Toast.LENGTH_LONG).show();
-                        }});
+                        }
+                    });
+                    System.out.println("Receiving file: " + files.get(i).getName());
+                    //create a new fileoutputstream for each new file
+                    //String filename = dis.readUTF();
+                    // System.out.println("UTF File name is : "+dis.readUTF());
+                    //System.out.println("FILE SIZES : "+fileSize);
+                    File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), files.get(i).getName());
+                    //in.createNewFile();
+                    if (in.exists()) {
+                        ReceiveFiles.this.runOnUiThread(new Runnable() {
 
+                            @Override
+                            public void run() {
+                                Toast.makeText(ReceiveFiles.this,
+                                        "FILE EXISTS : " + in.getName(),
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        ReceiveFiles.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(ReceiveFiles.this,
+                                        "FILE DOES NOT EXIST!!!!",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        in.createNewFile();
+                    }
+                    FileOutputStream fos = new FileOutputStream(in);
+                    //read file
+                    while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int) Math.min(buf.length, FileSize[i]))) != -1) {
+                        fos.write(buf, 0, n);
+                        FileSize[i] -= n;
+                        if (FileSize[i] == 0 || FileSize[i] < 0)
+                            break;
+                    }
+                    fos.close();
                 }
-                else
-                {
-                    ReceiveFiles.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Toast.makeText(ReceiveFiles.this,
-                                    "FILE DOES NOT EXIST!!!!",
-                                    Toast.LENGTH_LONG).show();
-                        }});
-                    in.createNewFile();
-                }
-                FileOutputStream fos = new FileOutputStream(in);
-                //read file
-                while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int)Math.min(buf.length, FileSize[i]))) != -1)
-                {
-                    fos.write(buf,0,n);
-                    FileSize[i]-=n;
-                    if(FileSize[i]==0 || FileSize[i]<0)
-                        break;
-                }
-                fos.close();
             }
-
         } catch (EOFException ignore) {
             // TODO Auto-generated catch block
 
@@ -258,5 +305,13 @@ public class ReceiveFiles extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }});
         }
+    }
+    public int checkFile(String filename)
+    {
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+filename);
+        if(file.exists())
+            return 1;
+        else
+            return -1;
     }
 }
