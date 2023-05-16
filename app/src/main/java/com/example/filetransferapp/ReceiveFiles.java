@@ -215,6 +215,13 @@ public class ReceiveFiles extends AppCompatActivity {
                                         Toast.LENGTH_LONG).show();
                             }});
                         ign[finalI]=0;
+                        File file = null;
+                        try {
+                            file = new File(dis.readUTF());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        files.add(file);
                         dialog.cancel();
                     });
                     // Create the Alert dialog
