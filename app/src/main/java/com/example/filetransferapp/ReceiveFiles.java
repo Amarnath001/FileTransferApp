@@ -198,14 +198,6 @@ public class ReceiveFiles extends AppCompatActivity {
             //outer loop, executes one for each file
             for(int i = 0; i < files.size();i++){
                     int finalI = i;
-                    ReceiveFiles.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(ReceiveFiles.this,
-                                    "FILE RECEIVING IS : " + files.get(finalI).getName(),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
                     System.out.println("Receiving file: " + files.get(i).getName());
                     //create a new fileoutputstream for each new file
                     //String filename = dis.readUTF();
@@ -219,7 +211,7 @@ public class ReceiveFiles extends AppCompatActivity {
                             public void run() {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ReceiveFiles.this);
                                 // Set the message show for the Alert time
-                                builder.setMessage("FILE ALREADY EXISTS!!! (DO YOU WANT TO CONTINUE?) ");
+                                builder.setMessage("FILE ALREADY EXISTS!!! (DO YOU WANT TO CONTINUE?) -------- FILE IS : "+in.getName());
                                 // Set Alert Title
                                 builder.setTitle("Alert !");
                                 // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
@@ -227,13 +219,14 @@ public class ReceiveFiles extends AppCompatActivity {
                                 // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
                                 builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
                                     // When the user click yes button then app will close
-                                    status =-1;
+                                    status =1;
                                     dialog.cancel();
                                 });
                                 // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
                                 builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
                                     // If user click no then dialog box is canceled.
-
+                                    status=-1;
+                                    dialog.cancel();
                                 });
 
                                 // Create the Alert dialog
@@ -253,6 +246,15 @@ public class ReceiveFiles extends AppCompatActivity {
                         });
                         in.createNewFile();
                     }
+                    if(status!=-1){
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ReceiveFiles.this,
+                                "FILE RECEIVING IS : " + files.get(finalI).getName(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                    });}
                     if(status!=-1) {
                         FileOutputStream fos = new FileOutputStream(in);
                         //read file
