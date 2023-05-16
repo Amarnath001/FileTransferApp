@@ -36,6 +36,7 @@ public class ReceiveFiles extends AppCompatActivity {
     //private TextView statusTextView;
     //private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
+    int status =0;
     Thread backRun;
     public static String TAG = "Receive Files : ";
     private static final String[] PERMISSIONS_STORAGE = {
@@ -181,60 +182,8 @@ public class ReceiveFiles extends AppCompatActivity {
             System.out.println("Number of Files to be received: " +number);
             //read file names, add files to arraylist
             for(int i = 0; i< number;i++){
-                String temp = dis.readUTF();
-                if(checkFile(temp)==1)
-                {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ReceiveFiles.this);
-                    // Set the message show for the Alert time
-                    builder.setMessage("FILE IS ALREADY PRESENT, DO YOU WANT TO CONTINUE?(WILL OVERWRITE IT)");
-                    // Set Alert Title
-                    builder.setTitle("Alert !");
-                    // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
-                    builder.setCancelable(false);
-                    // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
-                    builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
-                        // When the user click yes button then app will close
-                        File file = null;
-                        try {
-                            file = new File(dis.readUTF());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        files.add(file);
-                    });
-                    // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
-                    int finalI = i;
-                    builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
-                        // If user click no then dialog box is canceled.
-                        ReceiveFiles.this.runOnUiThread(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                Toast.makeText(ReceiveFiles.this,
-                                        "FILE: "+ temp + " Will be Ignored!!!",
-                                        Toast.LENGTH_LONG).show();
-                            }});
-                        ign[finalI]=0;
-                        File file = null;
-                        try {
-                            file = new File(dis.readUTF());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        files.add(file);
-                        dialog.cancel();
-                    });
-                    // Create the Alert dialog
-                    AlertDialog alertDialog = builder.create();
-                    // Show the Alert Dialog box
-                    alertDialog.show();
-                }
-                else{
-                    File file = new File(dis.readUTF());
-                    files.add(file);
-                }
-                    //File file = new File(dis.readUTF());
-                //files.add(file);
+                File file = new File(dis.readUTF());
+                files.add(file);
             }
             System.out.println("FILE LIST IN CLIENT SIDE : " +files);
             for(int i=0;i<number;i++)
@@ -248,7 +197,6 @@ public class ReceiveFiles extends AppCompatActivity {
             byte[]buf = new byte[4092];
             //outer loop, executes one for each file
             for(int i = 0; i < files.size();i++){
-                if(ign[i]==1) {
                     int finalI = i;
                     ReceiveFiles.this.runOnUiThread(new Runnable() {
                         @Override
@@ -267,12 +215,31 @@ public class ReceiveFiles extends AppCompatActivity {
                     //in.createNewFile();
                     if (in.exists()) {
                         ReceiveFiles.this.runOnUiThread(new Runnable() {
-
                             @Override
                             public void run() {
-                                Toast.makeText(ReceiveFiles.this,
-                                        "FILE EXISTS : " + in.getName(),
-                                        Toast.LENGTH_LONG).show();
+                                AlertDialog.Builder builder = new AlertDialog.Builder(ReceiveFiles.this);
+                                // Set the message show for the Alert time
+                                builder.setMessage("FILE ALREADY EXISTS!!! (DO YOU WANT TO CONTINUE?) ");
+                                // Set Alert Title
+                                builder.setTitle("Alert !");
+                                // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+                                builder.setCancelable(false);
+                                // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
+                                builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
+                                    // When the user click yes button then app will close
+                                    status =-1;
+                                    dialog.cancel();
+                                });
+                                // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
+                                builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                                    // If user click no then dialog box is canceled.
+
+                                });
+
+                                // Create the Alert dialog
+                                AlertDialog alertDialog = builder.create();
+                                // Show the Alert Dialog box
+                                alertDialog.show();
                             }
                         });
                     } else {
@@ -280,23 +247,25 @@ public class ReceiveFiles extends AppCompatActivity {
                             @Override
                             public void run() {
                                 Toast.makeText(ReceiveFiles.this,
-                                        "FILE DOES NOT EXIST!!!!",
+                                        "FILE DOES NOT EXIST , Creating New File!!",
                                         Toast.LENGTH_LONG).show();
                             }
                         });
                         in.createNewFile();
                     }
-                    FileOutputStream fos = new FileOutputStream(in);
-                    //read file
-                    while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int) Math.min(buf.length, FileSize[i]))) != -1) {
-                        fos.write(buf, 0, n);
-                        FileSize[i] -= n;
-                        if (FileSize[i] == 0 || FileSize[i] < 0)
-                            break;
-                    }
+                    if(status!=-1) {
+                        FileOutputStream fos = new FileOutputStream(in);
+                        //read file
+                        while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int) Math.min(buf.length, FileSize[i]))) != -1) {
+                            fos.write(buf, 0, n);
+                            FileSize[i] -= n;
+                            if (FileSize[i] == 0 || FileSize[i] < 0)
+                                break;
+                        }
                     fos.close();
+                    }
                 }
-            }
+
         } catch (EOFException ignore) {
             // TODO Auto-generated catch block
 
