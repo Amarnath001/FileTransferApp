@@ -332,8 +332,9 @@ public class ReceiveFiles extends AppCompatActivity {
             // Get file input stream for reading the file
             // content
             System.out.println("Looking for file at : "+file);
-            FileInputStream fis = new FileInputStream(file);
-
+            String Fname = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+file;
+            System.out.println("Now looking at : "+Fname);
+            FileInputStream fis = new FileInputStream(Fname);
             // Create byte array to read data in chunks
             byte[] byteArray = new byte[1024];
             int bytesCount = 0;
