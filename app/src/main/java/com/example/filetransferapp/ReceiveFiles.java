@@ -1,4 +1,5 @@
 package com.example.filetransferapp;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -7,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -27,7 +29,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 //import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
@@ -88,6 +95,7 @@ public class ReceiveFiles extends AppCompatActivity {
             Log.v(TAG, "Add : " + dstAddress + "Port : " + dstPort);
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @SuppressLint("SetTextI18n")
         @Override
         public void run() {
@@ -165,6 +173,7 @@ public class ReceiveFiles extends AppCompatActivity {
             }
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void receive(Socket socket){
         try {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -173,6 +182,7 @@ public class ReceiveFiles extends AppCompatActivity {
 //read the number of files from the client
             int number = dis.readInt();
             int ign[]=new int[number];
+            String fileMd5[] = new String[number];
             for(int j = 0 ;j<number;j++)
             {
                 ign[j]=1;
@@ -191,6 +201,12 @@ public class ReceiveFiles extends AppCompatActivity {
 
                 FileSize[i]= dis.readLong();
 
+            }
+            for(int i=0;i<number;i++)
+            {
+                //noinspection deprecation
+                fileMd5[i]= dis.readLine();
+                System.out.println("MD5 : "+fileMd5[i]);
             }
             System.out.println("FILE LIST (SIZES) IN CLIENT SIDE : " + Arrays.toString(FileSize));
             int n = 0;
@@ -267,6 +283,34 @@ public class ReceiveFiles extends AppCompatActivity {
                     fos.close();
                     }
                 }
+            for(int i=0;i<files.size();i++)
+            {
+                if(fileMd5[i].equals(md5File(files.get(i))))
+                {
+                    int finalI = i;
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "FILE INTEGRIGTY OF : "+files.get(finalI)+" IS VERIFIED !!!!",
+                                    Toast.LENGTH_LONG).show();
+                        }});
+                }
+                else
+                {
+                    int finalI = i;
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "FILE : "+files.get(finalI)+" IS CORRUPT!!!!",
+                                    Toast.LENGTH_LONG).show();
+                        }});
+                    System.out.println(Arrays.toString(fileMd5));
+                }
+            }
 
         } catch (EOFException ignore) {
             // TODO Auto-generated catch block
@@ -279,7 +323,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 @Override
                 public void run() {
                     Toast.makeText(ReceiveFiles.this,
-                            "FILE RECEIVED!!!!",
+                            "FILES RECEIVED & INTEGRITY CHECK COMPLETED!!",
                             Toast.LENGTH_LONG).show();
                 }});
         }
@@ -291,5 +335,19 @@ public class ReceiveFiles extends AppCompatActivity {
             return 1;
         else
             return -1;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String md5File(File file) throws IOException {
+
+        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+        byte[] hash = new byte[0];
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        String checksum = new BigInteger(1, hash).toString(16);
+        System.out.println("FILE NAME : "+file.getName()+" MD5 : "+checksum);
+        return checksum;
     }
 }

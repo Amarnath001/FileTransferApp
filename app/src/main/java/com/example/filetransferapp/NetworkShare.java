@@ -500,7 +500,7 @@ public class NetworkShare extends AppCompatActivity {
             }
             for(int i=0;i< files.size();i++)
             {
-                dos.writeBytes(md5File(files.get(i)));
+                dos.writeChars(md5File(files.get(i)));
                 dos.flush();
             }
             //buffer for file writing, to declare inside or outside loop?
