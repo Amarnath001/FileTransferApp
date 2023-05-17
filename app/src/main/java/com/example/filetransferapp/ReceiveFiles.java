@@ -1,4 +1,5 @@
 package com.example.filetransferapp;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -7,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -27,7 +29,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 //import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
@@ -291,5 +298,22 @@ public class ReceiveFiles extends AppCompatActivity {
             return 1;
         else
             return -1;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String calculateMD5(File file) throws IOException {
+        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+        byte[] hash;
+
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            hash = messageDigest.digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        BigInteger hashNumber = new BigInteger(1, hash);
+        String checksum = hashNumber.toString(16);
+
+        return checksum;
     }
 }
