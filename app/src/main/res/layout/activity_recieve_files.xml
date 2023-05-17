@@ -38,4 +38,16 @@
         android:layout_marginEnd="96dp"
         android:text="ServerConnect" />
 
+    <Button
+        android:id="@+id/Integrity"
+        android:layout_width="186dp"
+        android:layout_height="37dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="104dp"
+        android:layout_marginTop="499dp"
+        android:layout_marginEnd="90dp"
+        android:text="Integrity Check" />
+
 </RelativeLayout>

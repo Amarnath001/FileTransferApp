@@ -42,6 +42,8 @@ import java.util.Arrays;
 //import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
 public class ReceiveFiles extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    String[] fileMd5;
+    ArrayList<File>files;
     //private TextView statusTextView;
     //private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
@@ -52,8 +54,8 @@ public class ReceiveFiles extends AppCompatActivity {
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-
     //public Socket socket;
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,7 @@ public class ReceiveFiles extends AppCompatActivity {
         setContentView(R.layout.activity_recieve_files);
         EditText serverIp = findViewById(R.id.IpServer);
         Button serverConnect = findViewById(R.id.Connect);
+        Button integrityCheck = findViewById(R.id.Integrity);
         serverConnect.setOnClickListener(v -> {
             Log.v(TAG, "In On create of rec activity");
             // Start a new thread to handle the network connection and file transfer
@@ -73,6 +76,28 @@ public class ReceiveFiles extends AppCompatActivity {
 
                 clientRxThread.start();
             });
+        integrityCheck.setOnClickListener(v->{
+            for(int i=0;i<files.size();i++)
+            {
+                try {
+                    if(fileMd5[i].equals(md5File(files.get(i),digest)))
+                    {
+                        Toast.makeText(ReceiveFiles.this,
+                                        "FILE INTEGRITY OF : "+files.get(i)+" IS VERIFIED !!!!",
+                                        Toast.LENGTH_LONG).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(ReceiveFiles.this,
+                                        "FILE : "+files.get(i)+" IS CORRUPT!!!!",
+                                        Toast.LENGTH_LONG).show();
+                    }
+                    System.out.println(Arrays.toString(fileMd5));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void verifyStoragePermissions(Activity activity) {
@@ -184,12 +209,12 @@ public class ReceiveFiles extends AppCompatActivity {
 //read the number of files from the client
             int number = dis.readInt();
             int ign[]=new int[number];
-            String fileMd5[] = new String[number];
+            fileMd5 = new String[number];
             for(int j = 0 ;j<number;j++)
             {
                 ign[j]=1;
             }
-            ArrayList<File>files = new ArrayList<File>(number);
+            files = new ArrayList<File>(number);
             long FileSize[] = new long[number];
             System.out.println("Number of Files to be received: " +number);
             //read file names, add files to arraylist
@@ -287,35 +312,6 @@ public class ReceiveFiles extends AppCompatActivity {
                     fos.close();
                     }
                 }
-            for(int i=0;i<files.size();i++)
-            {
-                if(fileMd5[i].equals(md5File(files.get(i),digest)))
-                {
-                    int finalI = i;
-                    ReceiveFiles.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Toast.makeText(ReceiveFiles.this,
-                                    "FILE INTEGRIGTY OF : "+files.get(finalI)+" IS VERIFIED !!!!",
-                                    Toast.LENGTH_LONG).show();
-                        }});
-                }
-                else
-                {
-                    int finalI = i;
-                    ReceiveFiles.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Toast.makeText(ReceiveFiles.this,
-                                    "FILE : "+files.get(finalI)+" IS CORRUPT!!!!",
-                                    Toast.LENGTH_LONG).show();
-                        }});
-                    System.out.println(Arrays.toString(fileMd5));
-                }
-            }
-
         } catch (EOFException ignore) {
             // TODO Auto-generated catch block
 
@@ -323,7 +319,6 @@ public class ReceiveFiles extends AppCompatActivity {
             e.printStackTrace();
         }finally {
             ReceiveFiles.this.runOnUiThread(new Runnable() {
-
                 @Override
                 public void run() {
                     Toast.makeText(ReceiveFiles.this,
@@ -331,14 +326,6 @@ public class ReceiveFiles extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }});
         }
-    }
-    public int checkFile(String filename)
-    {
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+filename);
-        if(file.exists())
-            return 1;
-        else
-            return -1;
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String md5File(File file,MessageDigest digest) throws IOException {
