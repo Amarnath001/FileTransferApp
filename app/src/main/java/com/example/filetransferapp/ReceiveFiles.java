@@ -80,7 +80,7 @@ public class ReceiveFiles extends AppCompatActivity {
             for(int i=0;i<files.size();i++)
             {
                 try {
-                    if(fileMd5[i].equals(md5File(files.get(i).getAbsolutePath(),digest)))
+                    if(fileMd5[i].equals(md5File(files.get(i))))
                     {
                         Toast.makeText(ReceiveFiles.this,
                                         "FILE INTEGRITY OF : "+files.get(i)+" IS VERIFIED !!!!",
@@ -328,50 +328,17 @@ public class ReceiveFiles extends AppCompatActivity {
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String md5File(String file,MessageDigest digest) throws IOException {
-            // Get file input stream for reading the file
-            // content
-            System.out.println("Looking for file at : "+file);
-            String Fname = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+file;
-            System.out.println("Now looking at : "+Fname);
-            FileInputStream fis = new FileInputStream(Fname);
-            // Create byte array to read data in chunks
-            byte[] byteArray = new byte[1024];
-            int bytesCount = 0;
-
-            // read the data from file and update that data in
-            // the message digest
-            while ((bytesCount = fis.read(byteArray)) != -1)
-            {
-                digest.update(byteArray, 0, bytesCount);
-            };
-
-            // close the input stream
-            fis.close();
-
-            // store the bytes returned by the digest() method
-            byte[] bytes = digest.digest();
-
-            // this array of bytes has bytes in decimal format
-            // so we need to convert it into hexadecimal format
-
-            // for this we create an object of StringBuilder
-            // since it allows us to update the string i.e. its
-            // mutable
-            StringBuilder sb = new StringBuilder();
-
-            // loop through the bytes array
-            for (int i = 0; i < bytes.length; i++) {
-
-                // the following line converts the decimal into
-                // hexadecimal format and appends that to the
-                // StringBuilder object
-                sb.append(Integer
-                        .toString((bytes[i] & 0xff) + 0x100, 16)
-                        .substring(1));
-            }
-            System.out.println("MD5 value on client side : "+sb.toString());
-            // finally we return the complete hash
-            return sb.toString();
+    public String md5File(File file) throws IOException {
+        String Fname=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+file.getName();
+        byte[] data = Files.readAllBytes(Paths.get(Fname));
+        byte[] hash = new byte[0];
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
+        String checksum = new BigInteger(1, hash).toString(16);
+        System.out.println("FILE NAME : "+file.getName()+" MD5 : "+checksum);
+        return checksum;
+    }
     }
