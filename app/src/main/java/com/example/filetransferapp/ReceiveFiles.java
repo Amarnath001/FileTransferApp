@@ -322,14 +322,14 @@ public class ReceiveFiles extends AppCompatActivity {
                 @Override
                 public void run() {
                     Toast.makeText(ReceiveFiles.this,
-                            "FILES RECEIVED & INTEGRITY CHECK COMPLETED!!",
+                            "FILES RECEIVED, PLEASE PROCEED WITH FILE INTEGRITY CHECK!!",
                             Toast.LENGTH_LONG).show();
                 }});
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String md5File(File file) throws IOException {
-        String Fname=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+file.getName();
+        String Fname=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/"+file.getName();
         byte[] data = Files.readAllBytes(Paths.get(Fname));
         byte[] hash = new byte[0];
         try {
