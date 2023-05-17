@@ -80,7 +80,7 @@ public class ReceiveFiles extends AppCompatActivity {
             for(int i=0;i<files.size();i++)
             {
                 try {
-                    if(fileMd5[i].equals(md5File(files.get(i),digest)))
+                    if(fileMd5[i].equals(md5File(files.get(i).getAbsolutePath(),digest)))
                     {
                         Toast.makeText(ReceiveFiles.this,
                                         "FILE INTEGRITY OF : "+files.get(i)+" IS VERIFIED !!!!",
@@ -328,9 +328,10 @@ public class ReceiveFiles extends AppCompatActivity {
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String md5File(File file,MessageDigest digest) throws IOException {
+    public String md5File(String file,MessageDigest digest) throws IOException {
             // Get file input stream for reading the file
             // content
+            System.out.println("Looking for file at : "+file);
             FileInputStream fis = new FileInputStream(file);
 
             // Create byte array to read data in chunks
