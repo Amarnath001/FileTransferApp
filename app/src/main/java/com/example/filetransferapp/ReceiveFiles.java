@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -338,8 +339,8 @@ public class ReceiveFiles extends AppCompatActivity {
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String md5File(File file) throws IOException {
-
-        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+        Path filePath = Paths.get(file.getPath());
+        byte[] data = Files.readAllBytes(filePath);
         byte[] hash = new byte[0];
         try {
             hash = MessageDigest.getInstance("MD5").digest(data);

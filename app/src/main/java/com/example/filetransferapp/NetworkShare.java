@@ -64,6 +64,7 @@ public class NetworkShare extends AppCompatActivity {
     int reqcode =1;
     String Wifiip;
     String NetIp;
+    String Md5file;
     static final int SocketServerPORT = 8080;
     ServerSocket serverSocket;
     public static Uri urt;
@@ -331,6 +332,7 @@ public class NetworkShare extends AppCompatActivity {
         TextView FileName= findViewById(R.id.fileName);
         TextView fileSize = findViewById(R.id.infoport);
         TextView IpAddress = findViewById(R.id.ipName);
+        TextView MD5 = findViewById(R.id.md5);
         long totalFileSize=0;
         super.onActivityResult(reqcode, resultcode, data);
         if(reqcode==reqcode && resultcode == Activity.RESULT_OK)
@@ -363,6 +365,11 @@ public class NetworkShare extends AppCompatActivity {
                     //uri = getFilePathFromUri(uri);
                     File file = new File(urt.getPath());
                     FileList.add(file);
+                    try {
+                        Md5file += md5File(file)+" , ";
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     Log.v(TAG, "" + FileList);
                     if (file.exists()) {
                         Toast.makeText(NetworkShare.this, "The file is found : " + file.getName(), Toast.LENGTH_LONG).show();
@@ -376,6 +383,7 @@ public class NetworkShare extends AppCompatActivity {
                 FileName.setText("The File Selected Are : " + fileNames);
                 fileSize.setText(setSize(totalFileSize) + "");
                 IpAddress.setText(getIpAddress());
+                MD5.setText("MD5 Values are : "+Md5file);
             }
             else
             {
@@ -400,6 +408,11 @@ public class NetworkShare extends AppCompatActivity {
                 File file = new File(uri.getPath());
                 FileList.add(file);
                 Log.v(TAG,""+FileList);
+                try {
+                    Md5file = md5File(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if(file.exists())
                 {
                     Toast.makeText(NetworkShare.this,"The file is found : "+file.getName(),Toast.LENGTH_LONG).show();
@@ -410,6 +423,7 @@ public class NetworkShare extends AppCompatActivity {
                     }
                 NetIp = getIpAddress();
                 IpAddress.setText("Ip Address: " + NetIp);
+                MD5.setText("MD5 Values are : "+Md5file);
             }
         }
     }
