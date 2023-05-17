@@ -231,8 +231,12 @@ public class ReceiveFiles extends AppCompatActivity {
             }
             for(int i=0;i<number;i++)
             {
+                int length=dis.readInt();
+                byte[] data=new byte[length];
+                dis.readFully(data);
+                String str=new String(data,"UTF-8");
                 //noinspection deprecation
-                fileMd5[i]= dis.readLine();
+                fileMd5[i]= str;
                 Log.v(TAG,"MD5 vlaue of file from Server Side :"+fileMd5[i]);
                 System.out.println("MD5 : "+fileMd5[i]);
             }

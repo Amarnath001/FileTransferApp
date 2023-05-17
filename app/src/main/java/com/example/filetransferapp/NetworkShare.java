@@ -478,8 +478,8 @@ public class NetworkShare extends AppCompatActivity {
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String md5File(File file) throws IOException {
-
-        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+        String Fname=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/"+file.getName();
+        byte[] data = Files.readAllBytes(Paths.get(Fname));
         byte[] hash = new byte[0];
         try {
             hash = MessageDigest.getInstance("MD5").digest(data);
@@ -515,7 +515,10 @@ public class NetworkShare extends AppCompatActivity {
             }
             for(int i=0;i< files.size();i++)
             {
-                dos.writeChars(md5File(files.get(i)));
+                String secCheck = md5File(files.get(i));
+                byte[] data=secCheck.getBytes("UTF-8");
+                dos.writeInt(data.length);
+                dos.write(data);
                 dos.flush();
             }
             //buffer for file writing, to declare inside or outside loop?
