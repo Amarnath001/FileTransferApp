@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -45,7 +46,7 @@ public class ReceiveFiles extends AppCompatActivity {
     //private TextView fileNameTextView;
     public int SERVER_PORT = 8080;
     int status =0;
-    Thread backRun;
+    MessageDigest digest;
     public static String TAG = "Receive Files : ";
     private static final String[] PERMISSIONS_STORAGE = {
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -207,8 +208,10 @@ public class ReceiveFiles extends AppCompatActivity {
             {
                 //noinspection deprecation
                 fileMd5[i]= dis.readLine();
+                Log.v(TAG,"MD5 vlaue of file from Server Side :"+fileMd5[i]);
                 System.out.println("MD5 : "+fileMd5[i]);
             }
+            System.out.println("Files MD value from Server side are : "+ Arrays.toString(fileMd5));
             System.out.println("FILE LIST (SIZES) IN CLIENT SIDE : " + Arrays.toString(FileSize));
             int n = 0;
             byte[]buf = new byte[4092];
@@ -286,7 +289,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 }
             for(int i=0;i<files.size();i++)
             {
-                if(fileMd5[i].equals(md5File(files.get(i))))
+                if(fileMd5[i].equals(md5File(files.get(i),digest)))
                 {
                     int finalI = i;
                     ReceiveFiles.this.runOnUiThread(new Runnable() {
@@ -338,17 +341,48 @@ public class ReceiveFiles extends AppCompatActivity {
             return -1;
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String md5File(File file) throws IOException {
-        Path filePath = Paths.get(file.getPath());
-        byte[] data = Files.readAllBytes(filePath);
-        byte[] hash = new byte[0];
-        try {
-            hash = MessageDigest.getInstance("MD5").digest(data);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+    public String md5File(File file,MessageDigest digest) throws IOException {
+            // Get file input stream for reading the file
+            // content
+            FileInputStream fis = new FileInputStream(file);
+
+            // Create byte array to read data in chunks
+            byte[] byteArray = new byte[1024];
+            int bytesCount = 0;
+
+            // read the data from file and update that data in
+            // the message digest
+            while ((bytesCount = fis.read(byteArray)) != -1)
+            {
+                digest.update(byteArray, 0, bytesCount);
+            };
+
+            // close the input stream
+            fis.close();
+
+            // store the bytes returned by the digest() method
+            byte[] bytes = digest.digest();
+
+            // this array of bytes has bytes in decimal format
+            // so we need to convert it into hexadecimal format
+
+            // for this we create an object of StringBuilder
+            // since it allows us to update the string i.e. its
+            // mutable
+            StringBuilder sb = new StringBuilder();
+
+            // loop through the bytes array
+            for (int i = 0; i < bytes.length; i++) {
+
+                // the following line converts the decimal into
+                // hexadecimal format and appends that to the
+                // StringBuilder object
+                sb.append(Integer
+                        .toString((bytes[i] & 0xff) + 0x100, 16)
+                        .substring(1));
+            }
+            System.out.println("MD5 value on client side : "+sb.toString());
+            // finally we return the complete hash
+            return sb.toString();
         }
-        String checksum = new BigInteger(1, hash).toString(16);
-        System.out.println("FILE NAME : "+file.getName()+" MD5 : "+checksum);
-        return checksum;
     }
-}
