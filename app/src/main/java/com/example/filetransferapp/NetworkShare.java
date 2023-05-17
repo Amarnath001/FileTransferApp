@@ -435,6 +435,7 @@ public class NetworkShare extends AppCompatActivity {
             FileUtils.copy(inputStream, outputStream); //Simply reads input to output stream
             outputStream.flush();
         }
+
         /*File sdCard = Environment.getExternalStorageDirectory();
         File dir = new File(sdCard.getAbsolutePath() + "/dir1/dir2");
         dir.mkdirs();
