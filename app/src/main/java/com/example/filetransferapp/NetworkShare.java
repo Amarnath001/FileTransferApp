@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -51,6 +52,10 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.nio.BufferUnderflowException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Objects;
@@ -255,6 +260,7 @@ public class NetworkShare extends AppCompatActivity {
                 }
             }
         }*/
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
@@ -455,6 +461,21 @@ public class NetworkShare extends AppCompatActivity {
             return count + " Mb";
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String md5File(File file) throws IOException {
+
+        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+        byte[] hash = new byte[0];
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        String checksum = new BigInteger(1, hash).toString(16);
+        System.out.println("FILE NAME : "+file.getName()+" MD5 : "+checksum);
+        return checksum;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void send(ArrayList<File> files, Socket socket){
         try {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -475,6 +496,11 @@ public class NetworkShare extends AppCompatActivity {
             {
                 dos.writeLong(files.get(i).length());
                 System.out.println("File SIZE is : "+files.get(i).length());
+                dos.flush();
+            }
+            for(int i=0;i< files.size();i++)
+            {
+                dos.writeBytes(md5File(files.get(i)));
                 dos.flush();
             }
             //buffer for file writing, to declare inside or outside loop?
