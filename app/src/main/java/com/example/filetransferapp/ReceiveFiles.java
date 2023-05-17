@@ -1,4 +1,5 @@
 package com.example.filetransferapp;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -7,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -30,6 +32,11 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 //import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
 public class ReceiveFiles extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -61,7 +68,6 @@ public class ReceiveFiles extends AppCompatActivity {
                         new ClientRxThread(
                                 serverIp.getText().toString(),
                                 SERVER_PORT);
-
                 clientRxThread.start();
             });
     }
@@ -87,7 +93,6 @@ public class ReceiveFiles extends AppCompatActivity {
             dstPort = port;
             Log.v(TAG, "Add : " + dstAddress + "Port : " + dstPort);
         }
-
         @SuppressLint("SetTextI18n")
         @Override
         public void run() {
@@ -129,7 +134,7 @@ public class ReceiveFiles extends AppCompatActivity {
                         public void run() {
                             setContentView(R.layout.activity_recieve_files);
                             TextView status = findViewById(R.id.status_text_view);
-                            status.setText("The File is being transfered.......");
+                            status.setText("The File is being transferred.......");
                         }});
                 }
                 bos.close();
@@ -292,4 +297,21 @@ public class ReceiveFiles extends AppCompatActivity {
         else
             return -1;
     }
-}
+    @RequiresApi(api = Build.VERSION_CODES.O)
+        public String calculateMD5(File file) throws IOException {
+            byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+            byte[] hash;
+
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                hash = messageDigest.digest(data);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+
+            BigInteger hashNumber = new BigInteger(1, hash);
+            String checksum = hashNumber.toString(16);
+
+            return checksum;
+        }
+    }
