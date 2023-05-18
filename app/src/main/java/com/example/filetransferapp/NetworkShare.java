@@ -2,12 +2,9 @@ package com.example.filetransferapp;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,34 +12,26 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
-import android.webkit.PermissionRequest;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -50,15 +39,12 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.URISyntaxException;
-import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Objects;
 
 public class NetworkShare extends AppCompatActivity {
     int reqcode =1;
@@ -69,7 +55,7 @@ public class NetworkShare extends AppCompatActivity {
     ServerSocket serverSocket;
     public static Uri urt;
     FileTxThread op;
-    serverSocketThread ServerSocketThread;
+    //serverSocketThread ServerSocketThread;
     ipTransfer IpTransferThread;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static final String[] PERMISSIONS_STORAGE = {
@@ -541,7 +527,7 @@ public class NetworkShare extends AppCompatActivity {
                 dos.flush();
             }
             //buffer for file writing, to declare inside or outside loop?
-            int n = 0;
+            int n;
             byte[]buf = new byte[4092];
             //outer loop, executes one for each file
             for(int i =0; i < files.size(); i++){
