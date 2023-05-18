@@ -152,6 +152,12 @@ public class NetworkShare extends AppCompatActivity {
                     op = new FileTxThread(socket,FileList);
                     // fileTxThread.setUri(urt);
                     op.start();
+                    if(op.isAlive())
+                    {
+                        Log.v(TAG,"FILEtxThread Still alive");
+                    }
+                    else
+                        break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
