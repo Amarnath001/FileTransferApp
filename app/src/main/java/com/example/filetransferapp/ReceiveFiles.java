@@ -206,6 +206,7 @@ public class ReceiveFiles extends AppCompatActivity {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             verifyStoragePermissions(this);
+            int stat = 0;
 //read the number of files from the client
             int number = dis.readInt();
             int ign[]=new int[number];
@@ -312,6 +313,18 @@ public class ReceiveFiles extends AppCompatActivity {
                             FileSize[i] -= n;
                             if (FileSize[i] == 0 || FileSize[i] < 0)
                                 break;
+                        }
+                        if(md5File(in).equals(fileMd5[i]))
+                        {
+                                stat = 1;
+                                dos.writeInt(stat);
+                                dos.flush();
+                        }
+                        else
+                        {
+                            stat = -1;
+                            dos.writeInt(stat);
+                            dos.flush();
                         }
                     fos.close();
                     }

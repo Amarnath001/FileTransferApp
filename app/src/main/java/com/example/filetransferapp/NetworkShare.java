@@ -161,6 +161,7 @@ public class NetworkShare extends AppCompatActivity {
                 {
                     try {
                         socket.close();
+                        recreate();
                     }catch (IOException e){
                         e.printStackTrace();
                     }
@@ -342,6 +343,7 @@ public class NetworkShare extends AppCompatActivity {
                 return;
             if(null!= data.getClipData())
             {
+                FileList.clear();
                 for(int i=0; i<data.getClipData().getItemCount();i++) {
                     //Intent is = data.getClipData().getItemAt(i).getIntent();
                     //fileNames = data.getData().getPath();
@@ -387,6 +389,7 @@ public class NetworkShare extends AppCompatActivity {
             }
             else
             {
+                FileList.clear();
                 Uri uri = data.getData();
                 //String temp = data.getData().getPath();
                 String temp = getFileName(uri);
@@ -535,6 +538,30 @@ public class NetworkShare extends AppCompatActivity {
                     dos.write(buf,0,n);
                     dos.flush();
 
+                }
+                int status;
+                status = dis.readInt();
+                if(status == 1)
+                {
+                    NetworkShare.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(NetworkShare.this,
+                                    "FILE WAS TRANSFERRED SUCCESSFULLY!!!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                if(status == -1)
+                {
+                    NetworkShare.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(NetworkShare.this,
+                                    "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER!!!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
                 //should i close the dataoutputstream here and make a new one each time?
             }
