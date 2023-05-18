@@ -282,7 +282,8 @@ public class NetworkShare extends AppCompatActivity {
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
             send(ftlist,socket);
-            stop();
+            //noinspection deprecation
+
         }
     }
     @SuppressLint("SetTextI18n")
