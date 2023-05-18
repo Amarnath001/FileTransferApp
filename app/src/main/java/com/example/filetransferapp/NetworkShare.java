@@ -167,7 +167,12 @@ public class NetworkShare extends AppCompatActivity {
                 {
                     try {
                         socket.close();
-                        recreate();
+                        NetworkShare.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                recreate();
+                            }
+                        });
                     }catch (IOException e){
                         e.printStackTrace();
                     }
@@ -201,6 +206,10 @@ public class NetworkShare extends AppCompatActivity {
                     op = new FileTxThread(socket,urt);
                    // fileTxThread.setUri(urt);
                     op.start();
+                    if(!op.isAlive())
+                    {
+                        break;
+                    }
                 }
             } catch (Exception e)
             {
@@ -218,7 +227,7 @@ public class NetworkShare extends AppCompatActivity {
             }
         }
     }
-    public class FileTxThread extends Thread{
+    public class FileTxThread extends Thread {
         Uri uri;
         Socket socket;
         ArrayList<File> ftlist = new ArrayList<>();
@@ -273,6 +282,7 @@ public class NetworkShare extends AppCompatActivity {
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
             send(ftlist,socket);
+            stop();
         }
     }
     @SuppressLint("SetTextI18n")
