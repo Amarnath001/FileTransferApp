@@ -152,15 +152,8 @@ public class NetworkShare extends AppCompatActivity {
                     op = new FileTxThread(socket,FileList);
                     // fileTxThread.setUri(urt);
                     op.start();
-                    if(op.isAlive())
-                    {
-                        Log.v(TAG,"FILEtxThread Still alive");
-                    }
-                    else
-                        break;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignore) {
             }finally {
                 Log.v(TAG,"In IpTransfer thread finally section");
                 if(socket!=null)
@@ -176,6 +169,15 @@ public class NetworkShare extends AppCompatActivity {
                     }catch (IOException e){
                         e.printStackTrace();
                     }
+                }
+                else
+                {
+                    NetworkShare.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            recreate();
+                        }
+                    });
                 }
             }
         }
@@ -282,8 +284,6 @@ public class NetworkShare extends AppCompatActivity {
         public void run() {
             Log.v(TAG,"In FileTXthread run!!!");
             send(ftlist,socket);
-            //noinspection deprecation
-
         }
     }
     @SuppressLint("SetTextI18n")
@@ -516,7 +516,6 @@ public class NetworkShare extends AppCompatActivity {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             //System.out.println(files.size());
-            long Filesizes[]=new long[10];
             //write the number of files to the server
             dos.writeInt(files.size());
             Log.d(TAG,"File Size (dos.writeLong) : "+ files.size());
@@ -589,6 +588,10 @@ public class NetworkShare extends AppCompatActivity {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }finally {
+            try{
+            socket.close();}
+            catch (IOException ignore){}
         }
     }
 }
