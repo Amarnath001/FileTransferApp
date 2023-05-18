@@ -559,22 +559,24 @@ public class NetworkShare extends AppCompatActivity {
                 status = dis.readInt();
                 if(status == 1)
                 {
+                    int finalI = i;
                     NetworkShare.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(NetworkShare.this,
-                                    "FILE WAS TRANSFERRED SUCCESSFULLY!!!",
+                                    "FILE WAS TRANSFERRED SUCCESSFULLY: "+files.get(finalI).getName(),
                                     Toast.LENGTH_LONG).show();
                         }
                     });
                 }
                 if(status == -1)
                 {
+                    int finalI1 = i;
                     NetworkShare.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(NetworkShare.this,
-                                    "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER!!!",
+                                    "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER: "+files.get(finalI1).getName(),
                                     Toast.LENGTH_LONG).show();
                         }
                     });
