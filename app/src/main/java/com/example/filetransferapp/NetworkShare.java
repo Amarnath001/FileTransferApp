@@ -97,7 +97,10 @@ public class NetworkShare extends AppCompatActivity {
             // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
             builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
                 // When the user click yes button then app will close
-                IpTransferThread.start();
+                if(!IpTransferThread.isAlive())
+                    IpTransferThread.start();
+                else
+                    Toast.makeText(NetworkShare.this,"The IP share thread is already running!!",Toast.LENGTH_LONG).show();
             });
             // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
             builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
@@ -109,9 +112,13 @@ public class NetworkShare extends AppCompatActivity {
             // Show the Alert Dialog box
             alertDialog.show();
         }
-        else{
-        //ServerSocketThread.start();
-        IpTransferThread.start();}
+        else {
+            if (!IpTransferThread.isAlive())
+                IpTransferThread.start();
+            else
+                Toast.makeText(NetworkShare.this, "The IP share thread is already running!!", Toast.LENGTH_LONG).show();
+            //ServerSocketThread.start();}
+        }
     }
     public class ipTransfer extends Thread {
         @Override
@@ -325,8 +332,6 @@ public class NetworkShare extends AppCompatActivity {
         //noinspection deprecation
         startActivityForResult(intent, reqcode);
     }
-
-
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @SuppressLint("SetTextI18n")
     @Override
@@ -576,6 +581,8 @@ public class NetworkShare extends AppCompatActivity {
             e.printStackTrace();
         }finally {
             try{
+                socket.shutdownInput();
+                socket.shutdownOutput();
             socket.close();}
             catch (IOException ignore){}
         }
