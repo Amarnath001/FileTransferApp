@@ -39,7 +39,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-//import static com.example.filetransferapp.NetworkShare.verifyStoragePermissions;
 public class ReceiveFiles extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     String[] fileMd5;
@@ -216,7 +215,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 ign[j]=1;
             }
             files = new ArrayList<File>(number);
-            long FileSize[] = new long[number];
+            long[] FileSize = new long[number];
             System.out.println("Number of Files to be received: " +number);
             //read file names, add files to arraylist
             for(int i = 0; i< number;i++){
@@ -342,6 +341,12 @@ public class ReceiveFiles extends AppCompatActivity {
                             "FILES RECEIVED, PLEASE PROCEED WITH FILE INTEGRITY CHECK!!",
                             Toast.LENGTH_LONG).show();
                 }});
+            try{socket.shutdownInput();
+            socket.shutdownOutput();
+            socket.close();}catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -358,4 +363,4 @@ public class ReceiveFiles extends AppCompatActivity {
         System.out.println("FILE NAME : "+file.getName()+" MD5 : "+checksum);
         return checksum;
     }
-    }
+}
