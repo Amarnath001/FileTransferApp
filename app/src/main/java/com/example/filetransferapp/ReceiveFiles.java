@@ -47,7 +47,7 @@ public class ReceiveFiles extends AppCompatActivity {
     ServerSocket ss;
     //private TextView statusTextView;
     //private TextView fileNameTextView;
-    public int SERVER_PORT = 8080;
+    public static final int SERVER_PORT = 8080;
     int status =0;
     MessageDigest digest;
     public static String TAG = "Receive Files : ";
@@ -129,18 +129,36 @@ public class ReceiveFiles extends AppCompatActivity {
             Log.v(TAG, "In Clientrxthread run method!!");
             Socket socket = null;
             try {
-                ss = new ServerSocket(SERVER_PORT);
-                ReceiveFiles.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                "Waiting for host!!",
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-                do {
+                while(true){
+                    Log.v(TAG,"Inside while loop of ClientRX thread");
+                    ss = new ServerSocket(SERVER_PORT);
+                    Log.v(TAG,""+ss);
                     socket = ss.accept();
-                } while (!socket.isConnected());
+                    Log.v(TAG,""+socket);
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "Waiting for host!!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    Log.v(TAG, "Socket : " + socket);
+                    if(socket.isConnected())
+                        break;
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            receive(socket);
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void receive(Socket socket){
+        try {
+            if(null!=socket) {
                 ReceiveFiles.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -149,18 +167,17 @@ public class ReceiveFiles extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show();
                     }
                 });
-                receive(socket);
-                Log.v(TAG, "Socket : " + socket);
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
+            else{
+                ReceiveFiles.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(ReceiveFiles.this,
+                                "SOcket null pointer !!",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
             }
-        }
-    }
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void receive(Socket socket){
-        try {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             verifyStoragePermissions(this);
