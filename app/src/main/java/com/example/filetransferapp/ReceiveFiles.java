@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.net.Network;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,6 +46,7 @@ public class ReceiveFiles extends AppCompatActivity {
     String[] fileMd5;
     ArrayList<File>files;
     ServerSocket ss;
+    Rectransfer rectransfer;
     //private TextView statusTextView;
     //private TextView fileNameTextView;
     public static final int SERVER_PORT = 8080;
@@ -134,24 +136,24 @@ public class ReceiveFiles extends AppCompatActivity {
                     ss = new ServerSocket(SERVER_PORT);
                     Log.v(TAG,""+ss);
                     socket = ss.accept();
+                    rectransfer = new Rectransfer(socket);
                     Log.v(TAG,""+socket);
-                    ReceiveFiles.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(ReceiveFiles.this,
-                                    "Waiting for host!!",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    Log.v(TAG, "Socket : " + socket);
-                    if(socket.isConnected())
-                        break;
                 }
             }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
+        }
+    }
+    private class Rectransfer extends Thread {
+        Socket socket;
+        public Rectransfer(Socket socket){
+            this.socket=socket;
+        }
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @Override
+        public void run() {
             receive(socket);
         }
     }
