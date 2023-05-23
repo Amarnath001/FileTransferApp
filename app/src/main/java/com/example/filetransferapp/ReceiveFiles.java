@@ -73,6 +73,9 @@ public class ReceiveFiles extends AppCompatActivity {
             Log.v(TAG, "In On create of rec activity");
             // Start a new thread to handle the network connection and file transfer
             //backRun.start();
+            Toast.makeText(ReceiveFiles.this,
+                    "WAITING FOR HOST!!!!",
+                    Toast.LENGTH_LONG).show();
                 ClientRxThread clientRxThread =
                         new ClientRxThread(
                                 SERVER_PORT);
@@ -131,7 +134,7 @@ public class ReceiveFiles extends AppCompatActivity {
             try {
                 while(true){
                     Log.v(TAG,"Inside while loop of ClientRX thread");
-                    ss = new ServerSocket(SERVER_PORT);
+                    ss = new ServerSocket(dstPort);
                     Log.v(TAG,""+ss);
                     socket = ss.accept();
                     Log.v(TAG,""+socket);
