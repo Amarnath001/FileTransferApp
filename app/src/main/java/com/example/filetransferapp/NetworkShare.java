@@ -20,6 +20,7 @@ import android.provider.OpenableColumns;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedInputStream;
@@ -44,6 +45,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 public class NetworkShare extends AppCompatActivity {
@@ -51,8 +53,9 @@ public class NetworkShare extends AppCompatActivity {
     String Wifiip;
     String NetIp;
     String Md5file;
+    String dstAddress;
     static final int SocketServerPORT = 8080;
-    ServerSocket serverSocket;
+    //ServerSocket serverSocket;
     public static Uri urt;
     FileTxThread op;
     //serverSocketThread ServerSocketThread;
@@ -79,7 +82,9 @@ public class NetworkShare extends AppCompatActivity {
     public void SendFile(View view) {
        // ServerSocketThread = new serverSocketThread();
         Log.v(TAG,"In sendfile button");
+        EditText sendIp = findViewById(R.id.IpSend);
         IpTransferThread = new ipTransfer();
+        dstAddress = sendIp.getText().toString();
         long totalSendSize=0;
         for(int i=0;i<FileList.size();i++)
         {
@@ -126,7 +131,7 @@ public class NetworkShare extends AppCompatActivity {
             Socket socket = null;
             try {
                 Log.v(TAG, "In IPtransfer thread run!!!");
-                serverSocket = new ServerSocket(SocketServerPORT);
+                //serverSocket = new ServerSocket(SocketServerPORT);
                 NetworkShare.this.runOnUiThread(new Runnable() {
                     @SuppressLint("SetTextI18n")
                     @Override
@@ -134,20 +139,32 @@ public class NetworkShare extends AppCompatActivity {
                         setContentView(R.layout.activity_network_share);
                         TextView infoport = findViewById(R.id.infoport);
                         TextView ipAdd = findViewById(R.id.ipName);
-                        infoport.setText("Waiting at : " + serverSocket.getLocalPort());
+                        infoport.setText("Waiting at : " + SocketServerPORT);
                         ipAdd.setText(getIpAddress() + "");
+                        System.out.println(dstAddress);
                     }
                 });
-                while(true){
-                    Log.v(TAG,"In socket thread while loop");
-                    Log.v(TAG,urt+"");
-                    socket = serverSocket.accept();
-                    op = new FileTxThread(socket,FileList);
-                    // fileTxThread.setUri(urt);
-                    op.start();
+                if(dstAddress==null)
+                {
+                    NetworkShare.this.runOnUiThread(new Runnable() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void run() {
+                            Toast.makeText(NetworkShare.this,"PLEASE ENTER IP ADDRESS OF CLIENT TO PROCCEED!!",Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
-            } catch (IOException ignore) {
-            }finally {
+                else{
+                Log.v(TAG,urt+"");
+                    try {
+                        socket = new Socket(dstAddress,SocketServerPORT);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    op = new FileTxThread(socket,FileList);
+                // fileTxThread.setUri(urt);
+                op.start();}
+            } finally {
                 Log.v(TAG,"In IpTransfer thread finally section");
                 if(socket!=null)
                 {
@@ -176,52 +193,6 @@ public class NetworkShare extends AppCompatActivity {
         }
     }
     //private int PERMISSION_REQUEST_CODE;
-    public class serverSocketThread extends Thread {
-
-        public void run() {
-            Socket socket = null;
-            try{
-                Log.v(TAG,"IN socket thread run!!!");
-                serverSocket = new ServerSocket(SocketServerPORT);
-                NetworkShare.this.runOnUiThread(new Runnable() {
-                    @SuppressLint("SetTextI18n")
-                    @Override
-                    public void run() {
-                        setContentView(R.layout.activity_network_share);
-                        TextView infoport = findViewById(R.id.infoport);
-                        TextView ipAdd  = findViewById(R.id.ipName);
-                        infoport.setText("Waiting at : "+serverSocket.getLocalPort());
-                        ipAdd.setText(getIpAddress()+"");
-                    }
-                });
-                while(true){
-                    Log.v(TAG,"In socket thread while loop");
-                    Log.v(TAG,urt+"");
-                    socket = serverSocket.accept();
-                    op = new FileTxThread(socket,urt);
-                   // fileTxThread.setUri(urt);
-                    op.start();
-                    if(!op.isAlive())
-                    {
-                        break;
-                    }
-                }
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            } finally {
-                Log.v(TAG,"In socket thread finally section");
-                if(socket!=null)
-                {
-                    try {
-                        socket.close();
-                    }catch (IOException e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
     public class FileTxThread extends Thread {
         Uri uri;
         Socket socket;
@@ -299,14 +270,6 @@ public class NetworkShare extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        if (serverSocket != null) {
-            try {
-                serverSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
     public static String getIpAddress() {
         try {
@@ -414,7 +377,7 @@ public class NetworkShare extends AppCompatActivity {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
                 urt = uri;
-                fileSize.setText(setSize(totalFileSize)+"");
+                //fileSize.setText(setSize(totalFileSize)+"");
                 FileName.setText(temp+"");
                 File file = new File(uri.getPath());
                 FileList.add(file);
@@ -433,6 +396,7 @@ public class NetworkShare extends AppCompatActivity {
                         Toast.makeText(NetworkShare.this,"FILE NOT FOUND!!! ",Toast.LENGTH_LONG).show();
                     }
                 NetIp = getIpAddress();
+                fileSize.setText(setSize(totalFileSize)+"");
                 IpAddress.setText("Ip Address: " + NetIp);
                 MD5.setText("MD5 Values are : "+Md5file);
             }

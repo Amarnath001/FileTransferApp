@@ -34,6 +34,13 @@
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:textStyle="italic" />
+
+    <EditText
+        android:id="@+id/IpSend"
+        android:layout_width="206dp"
+        android:layout_height="40dp"
+        android:hint="IP ADDRESS OF CLIENT"
+        tools:ignore="HardcodedText" />
     <Button
         android:id="@+id/button_GetFile"
         android:layout_width="wrap_content"

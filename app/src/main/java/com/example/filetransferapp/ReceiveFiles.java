@@ -74,7 +74,6 @@ public class ReceiveFiles extends AppCompatActivity {
             //backRun.start();
                 ClientRxThread clientRxThread =
                         new ClientRxThread(
-                                serverIp.getText().toString(),
                                 SERVER_PORT);
                 clientRxThread.start();
             });
@@ -118,8 +117,8 @@ public class ReceiveFiles extends AppCompatActivity {
         String dstAddress;
         int dstPort;
 
-        ClientRxThread(String address, int port) {
-            dstAddress = address;
+        ClientRxThread(int port) {
+            //dstAddress = address;
             dstPort = port;
             Log.v(TAG, "Add : " + dstAddress + "Port : " + dstPort);
         }
