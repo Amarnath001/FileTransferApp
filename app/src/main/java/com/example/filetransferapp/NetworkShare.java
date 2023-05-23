@@ -131,6 +131,7 @@ public class NetworkShare extends AppCompatActivity {
             Socket socket = null;
             try {
                 socket = new Socket(dstAddress,SocketServerPORT);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -161,7 +162,15 @@ public class NetworkShare extends AppCompatActivity {
                 }
                 else{
                 Log.v(TAG,urt+"");
-                    if(socket!=null){
+                    assert socket != null;
+                    if(socket.isConnected()){
+                        NetworkShare.this.runOnUiThread(new Runnable() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void run() {
+                                Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
+                            }
+                        });
                         op = new FileTxThread(socket,FileList);
                         op.start();}
                     else{
@@ -176,7 +185,9 @@ public class NetworkShare extends AppCompatActivity {
                 }
             } finally {
                 Log.v(TAG,"In IpTransfer thread finally section");
-                    NetworkShare.this.runOnUiThread(new Runnable() {
+                assert socket != null;
+                if(socket.isClosed()){
+                NetworkShare.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             recreate();
@@ -184,6 +195,7 @@ public class NetworkShare extends AppCompatActivity {
                     });
                 }
             }
+        }
     }
     //private int PERMISSION_REQUEST_CODE;
     public class FileTxThread extends Thread {
@@ -201,41 +213,6 @@ public class NetworkShare extends AppCompatActivity {
             this.socket=socket;
             ftlist.addAll(ft);
         }
-        /*@Override
-        public void run() {
-            Log.v(TAG,"In FileTXthread run!!!");
-            File file = new File(uri.getPath());
-            Log.v(TAG,"File is : "+file);
-            byte[] bytes = new byte[(int)file.length()];
-            BufferedInputStream bis;
-            try {
-                bis = new BufferedInputStream(new FileInputStream(file));
-                bis.read(bytes,0,bytes.length);
-                OutputStream os = socket.getOutputStream();
-                Log.v(TAG,"IN process of sending!!!!");
-                os.write(bytes,0,bytes.length);
-                os.flush();
-                Log.v(TAG,"File sent!!!");
-                socket.close();
-                final String sentMsg = "File Sent to : " + socket.getInetAddress();
-                NetworkShare.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setContentView(R.layout.activity_network_share);
-                        Toast.makeText(NetworkShare.this,sentMsg,Toast.LENGTH_LONG).show();
-                    }
-                });
-            }catch (IOException e)
-            {
-                e.printStackTrace();
-            }finally {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void run() {

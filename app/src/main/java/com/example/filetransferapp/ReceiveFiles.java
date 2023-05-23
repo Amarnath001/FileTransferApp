@@ -114,13 +114,11 @@ public class ReceiveFiles extends AppCompatActivity {
     }
 
     private class ClientRxThread extends Thread {
-        String dstAddress;
         int dstPort;
-
         ClientRxThread(int port) {
             //dstAddress = address;
             dstPort = port;
-            Log.v(TAG, "Add : " + dstAddress + "Port : " + dstPort);
+            Log.v(TAG,"Port : " + dstPort);
         }
 
         @RequiresApi(api = Build.VERSION_CODES.O)
@@ -135,9 +133,20 @@ public class ReceiveFiles extends AppCompatActivity {
                     ss = new ServerSocket(SERVER_PORT);
                     Log.v(TAG,""+ss);
                     socket = ss.accept();
-                    rectransfer = new Rectransfer(socket);
                     Log.v(TAG,""+socket);
+                    if(socket.isConnected()){
+                        ReceiveFiles.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(ReceiveFiles.this,
+                                        "Connected to host!!",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        break;
+                    }
                 }
+                rectransfer = new Rectransfer(socket);
             }
             catch (IOException e)
             {
@@ -159,26 +168,6 @@ public class ReceiveFiles extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void receive(Socket socket){
         try {
-            if(null!=socket) {
-                ReceiveFiles.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                "Connected to host!!",
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-            else{
-                ReceiveFiles.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                "SOcket null pointer !!",
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             verifyStoragePermissions(this);
