@@ -151,6 +151,7 @@ public class ReceiveFiles extends AppCompatActivity {
                     }
                 }
                 rectransfer = new Rectransfer(socket);
+                rectransfer.start();
             }
             catch (IOException e)
             {

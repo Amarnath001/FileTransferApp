@@ -132,74 +132,35 @@ public class NetworkShare extends AppCompatActivity {
             Socket socket = null;
             try {
                 socket = new Socket(dstAddress,SocketServerPORT);
-
+                if(socket.isConnected()){
+                    send(FileList,socket);
+                    NetworkShare.this.runOnUiThread(new Runnable() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void run() {
+                            setContentView(R.layout.activity_network_share);
+                            TextView infoport = findViewById(R.id.infoport);
+                            TextView ipAdd = findViewById(R.id.ipName);
+                            infoport.setText("Waiting at : " + SocketServerPORT);
+                            ipAdd.setText(getIpAddress() + "");
+                            System.out.println(dstAddress);
+                            Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
                 Log.v(TAG, "In IPtransfer thread run!!!");
-                //serverSocket = new ServerSocket(SocketServerPORT);
-                NetworkShare.this.runOnUiThread(new Runnable() {
-                    @SuppressLint("SetTextI18n")
-                    @Override
-                    public void run() {
-                        setContentView(R.layout.activity_network_share);
-                        TextView infoport = findViewById(R.id.infoport);
-                        TextView ipAdd = findViewById(R.id.ipName);
-                        infoport.setText("Waiting at : " + SocketServerPORT);
-                        ipAdd.setText(getIpAddress() + "");
-                        System.out.println(dstAddress);
-                    }
-                });
-                if(dstAddress==null)
-                {
-                    NetworkShare.this.runOnUiThread(new Runnable() {
-                        @SuppressLint("SetTextI18n")
-                        @Override
-                        public void run() {
-                            Toast.makeText(NetworkShare.this,"PLEASE ENTER IP ADDRESS OF CLIENT TO PROCCEED!!",Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-                else{
                 Log.v(TAG,urt+"");
-                    assert socket != null;
-                    if(socket.isConnected()){
-                        send(FileList,socket);
-                        NetworkShare.this.runOnUiThread(new Runnable() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void run() {
-                                Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                        }
-                    else{
-                        NetworkShare.this.runOnUiThread(new Runnable() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void run() {
-                                Toast.makeText(NetworkShare.this,"Socket is not connecting to host!!, Socket is null!!!",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                }
             } finally {
                 Log.v(TAG,"In IpTransfer thread finally section");
-                assert socket != null;
-                if(socket.isClosed()){
-                NetworkShare.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            recreate();
-                        }
-                    });
-                }
             }
         }
     }
     //private int PERMISSION_REQUEST_CODE;
-    public class FileTxThread extends Thread {
+     public class FileTxThread extends Thread {
         Uri uri;
         Socket socket;
         ArrayList<File> ftlist = new ArrayList<>();
