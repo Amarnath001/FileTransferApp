@@ -126,6 +126,7 @@ public class NetworkShare extends AppCompatActivity {
         }
     }
     public class ipTransfer extends Thread {
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void run() {
             Socket socket = null;
@@ -164,6 +165,7 @@ public class NetworkShare extends AppCompatActivity {
                 Log.v(TAG,urt+"");
                     assert socket != null;
                     if(socket.isConnected()){
+                        send(FileList,socket);
                         NetworkShare.this.runOnUiThread(new Runnable() {
                             @SuppressLint("SetTextI18n")
                             @Override
@@ -171,8 +173,7 @@ public class NetworkShare extends AppCompatActivity {
                                 Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
                             }
                         });
-                        op = new FileTxThread(socket,FileList);
-                        op.start();}
+                        }
                     else{
                         NetworkShare.this.runOnUiThread(new Runnable() {
                             @SuppressLint("SetTextI18n")
