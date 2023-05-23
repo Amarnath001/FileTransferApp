@@ -130,6 +130,11 @@ public class NetworkShare extends AppCompatActivity {
         public void run() {
             Socket socket = null;
             try {
+                socket = new Socket(dstAddress,SocketServerPORT);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
                 Log.v(TAG, "In IPtransfer thread run!!!");
                 //serverSocket = new ServerSocket(SocketServerPORT);
                 NetworkShare.this.runOnUiThread(new Runnable() {
@@ -156,32 +161,21 @@ public class NetworkShare extends AppCompatActivity {
                 }
                 else{
                 Log.v(TAG,urt+"");
-                    try {
-                        socket = new Socket(dstAddress,SocketServerPORT);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    op = new FileTxThread(socket,FileList);
-                // fileTxThread.setUri(urt);
-                op.start();}
-            } finally {
-                Log.v(TAG,"In IpTransfer thread finally section");
-                if(socket!=null)
-                {
-                    try {
-                        socket.close();
+                    if(socket!=null){
+                        op = new FileTxThread(socket,FileList);
+                        op.start();}
+                    else{
                         NetworkShare.this.runOnUiThread(new Runnable() {
+                            @SuppressLint("SetTextI18n")
                             @Override
                             public void run() {
-                                recreate();
+                                Toast.makeText(NetworkShare.this,"Socket is not connecting to host!!, Socket is null!!!",Toast.LENGTH_LONG).show();
                             }
                         });
-                    }catch (IOException e){
-                        e.printStackTrace();
                     }
                 }
-                else
-                {
+            } finally {
+                Log.v(TAG,"In IpTransfer thread finally section");
                     NetworkShare.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -190,7 +184,6 @@ public class NetworkShare extends AppCompatActivity {
                     });
                 }
             }
-        }
     }
     //private int PERMISSION_REQUEST_CODE;
     public class FileTxThread extends Thread {
