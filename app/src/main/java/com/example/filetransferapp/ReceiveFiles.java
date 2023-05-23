@@ -59,13 +59,14 @@ public class ReceiveFiles extends AppCompatActivity {
     };
     //public Socket socket;
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         verifyStoragePermissions(ReceiveFiles.this);
         setContentView(R.layout.activity_recieve_files);
-        EditText serverIp = findViewById(R.id.IpServer);
+        TextView serverIp = findViewById(R.id.IpServer);
+        serverIp.setText("Please enter this IP at server to send file : "+NetworkShare.getIpAddress());
         Button serverConnect = findViewById(R.id.Connect);
         Button integrityCheck = findViewById(R.id.Integrity);
         serverConnect.setOnClickListener(v -> {
@@ -276,6 +277,13 @@ public class ReceiveFiles extends AppCompatActivity {
                         while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int) Math.min(buf.length, FileSize[i]))) != -1) {
                             fos.write(buf, 0, n);
                             FileSize[i] -= n;
+                            ReceiveFiles.this.runOnUiThread(new Runnable() {
+                                @SuppressLint("SetTextI18n")
+                                @Override
+                                public void run() {
+                                    TextView fileName = findViewById(R.id.file_name_text_view);
+                                    fileName.setText("File currentkly transfering is : "+in.getName());
+                                }});
                             if (FileSize[i] == 0 || FileSize[i] < 0)
                                 break;
                         }
