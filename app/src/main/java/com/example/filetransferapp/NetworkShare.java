@@ -133,7 +133,6 @@ public class NetworkShare extends AppCompatActivity {
             try {
                 socket = new Socket(dstAddress,SocketServerPORT);
                 if(socket.isConnected()){
-                    send(FileList,socket);
                     NetworkShare.this.runOnUiThread(new Runnable() {
                         @SuppressLint("SetTextI18n")
                         @Override
@@ -147,6 +146,7 @@ public class NetworkShare extends AppCompatActivity {
                             Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
                         }
                     });
+                    send(FileList,socket);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -286,7 +286,7 @@ public class ReceiveFiles extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     TextView fileName = findViewById(R.id.file_name_text_view);
-                                    fileName.setText("File currentkly transfering is : "+in.getName());
+                                    fileName.setText("File currently transferring is : "+in.getName());
                                 }});
                             if (FileSize[i] == 0 || FileSize[i] < 0)
                                 break;
@@ -316,7 +316,7 @@ public class ReceiveFiles extends AppCompatActivity {
                 @Override
                 public void run() {
                     Toast.makeText(ReceiveFiles.this,
-                            "FILES RECEIVED, PLEASE PROCEED WITH FILE INTEGRITY CHECK!!",
+                            "OPERATION COMPLETED SUCCESSFULLY",
                             Toast.LENGTH_LONG).show();
                 }});
             try{socket.shutdownInput();
