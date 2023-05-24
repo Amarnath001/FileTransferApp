@@ -179,7 +179,7 @@ public class ReceiveFiles extends AppCompatActivity {
             int stat = 0;
 //read the number of files from the client
             int number = dis.readInt();
-            int ign[]=new int[number];
+            int[] ign =new int[number];
             fileMd5 = new String[number];
             for(int j = 0 ;j<number;j++)
             {
@@ -206,7 +206,6 @@ public class ReceiveFiles extends AppCompatActivity {
                 byte[] data=new byte[length];
                 dis.readFully(data);
                 String str=new String(data,"UTF-8");
-                //noinspection deprecation
                 fileMd5[i]= str;
                 Log.v(TAG,"MD5 vlaue of file from Server Side :"+fileMd5[i]);
                 System.out.println("MD5 : "+fileMd5[i]);

@@ -37,15 +37,16 @@ import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.ServerSocket;
+//import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.Enumeration;
 
 public class NetworkShare extends AppCompatActivity {
@@ -57,8 +58,7 @@ public class NetworkShare extends AppCompatActivity {
     static final int SocketServerPORT = 8080;
     //ServerSocket serverSocket;
     public static Uri urt;
-    FileTxThread op;
-    //serverSocketThread ServerSocketThread;
+    //FileTxThread op;
     ipTransfer IpTransferThread;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static final String[] PERMISSIONS_STORAGE = {
@@ -126,25 +126,22 @@ public class NetworkShare extends AppCompatActivity {
         }
     }
     public class ipTransfer extends Thread {
+        @SuppressLint("SetTextI18n")
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void run() {
-            Socket socket = null;
+            Socket socket;
             try {
                 socket = new Socket(dstAddress,SocketServerPORT);
                 if(socket.isConnected()){
-                    NetworkShare.this.runOnUiThread(new Runnable() {
-                        @SuppressLint("SetTextI18n")
-                        @Override
-                        public void run() {
-                            setContentView(R.layout.activity_network_share);
-                            TextView infoport = findViewById(R.id.infoport);
-                            TextView ipAdd = findViewById(R.id.ipName);
-                            infoport.setText("Waiting at : " + SocketServerPORT);
-                            ipAdd.setText(getIpAddress() + "");
-                            System.out.println(dstAddress);
-                            Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
-                        }
+                    NetworkShare.this.runOnUiThread(() -> {
+                        setContentView(R.layout.activity_network_share);
+                        TextView infoport = findViewById(R.id.infoport);
+                        TextView ipAdd = findViewById(R.id.ipName);
+                        infoport.setText("Waiting at : " + SocketServerPORT);
+                        ipAdd.setText(getIpAddress() + "");
+                        System.out.println(dstAddress);
+                        Toast.makeText(NetworkShare.this,"Connected to host!!",Toast.LENGTH_LONG).show();
                     });
                     send(FileList,socket);
                 }
@@ -160,7 +157,7 @@ public class NetworkShare extends AppCompatActivity {
         }
     }
     //private int PERMISSION_REQUEST_CODE;
-     public class FileTxThread extends Thread {
+    /* public class FileTxThread extends Thread {
         Uri uri;
         Socket socket;
         ArrayList<File> ftlist = new ArrayList<>();
@@ -181,7 +178,7 @@ public class NetworkShare extends AppCompatActivity {
             Log.v(TAG,"In FileTXthread run!!!");
             send(ftlist,socket);
         }
-    }
+    }*/
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -398,82 +395,101 @@ public class NetworkShare extends AppCompatActivity {
         return checksum;
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void send(ArrayList<File> files, Socket socket){
+    public void send(ArrayList<File> files, Socket socket) {
         try {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             //System.out.println(files.size());
             //write the number of files to the server
-            dos.writeInt(files.size());
-            Log.d(TAG,"File Size (dos.writeLong) : "+ files.size());
-            dos.flush();
-            //write file names
-            for(int i = 0 ; i < files.size();i++){
-                dos.writeUTF(files.get(i).getName());
-                dos.flush();
-            }
-            //write file sizes
-            for(int i=0;i< files.size();i++)
-            {
-                dos.writeLong(files.get(i).length());
-                System.out.println("File SIZE is : "+files.get(i).length());
-                dos.flush();
-            }
-            for(int i=0;i< files.size();i++)
-            {
-                String secCheck = md5File(files.get(i));
-                byte[] data=secCheck.getBytes("UTF-8");
+            if(files.size()==1){
+                int n;
+                byte[] buf = new byte[4092];
+                dos.writeInt(files.size());
+                dos.writeUTF(files.get(0).getName());
+                dos.writeLong(files.get(0).length());
+                System.out.println("File SIZE is : " + files.get(0).length());
+                String secCheck = md5File(files.get(0));
+                byte[] data = secCheck.getBytes(StandardCharsets.UTF_8);
                 dos.writeInt(data.length);
                 dos.write(data);
-                dos.flush();
-            }
-            //buffer for file writing, to declare inside or outside loop?
-            int n;
-            byte[]buf = new byte[4092];
-            //outer loop, executes one for each file
-            for(int i =0; i < files.size(); i++){
-                System.out.println(files.get(i).length());
-                System.out.println(files.get(i).getName());
-                //create new fileinputstream for each file
-                FileInputStream fis = new FileInputStream(files.get(i));
+                FileInputStream fis = new FileInputStream(files.get(0));
                 //write file to dos
-                while((n =fis.read(buf)) != -1){
-                    dos.write(buf,0,n);
-                    dos.flush();
-
+                while ((n = fis.read(buf)) != -1) {
+                    dos.write(buf, 0, n);
                 }
+                dos.flush();
                 int status;
                 status = dis.readInt();
-                if(status == 1)
-                {
-                    int finalI = i;
-                    NetworkShare.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(NetworkShare.this,
-                                    "FILE WAS TRANSFERRED SUCCESSFULLY: "+files.get(finalI).getName(),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
+                if (status == 1) {
+                    int finalI = 0;
+                    NetworkShare.this.runOnUiThread(() -> Toast.makeText(NetworkShare.this,
+                            "FILE WAS TRANSFERRED SUCCESSFULLY: " + files.get(finalI).getName(),
+                            Toast.LENGTH_LONG).show());
                 }
-                if(status == -1)
-                {
-                    int finalI1 = i;
-                    NetworkShare.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(NetworkShare.this,
-                                    "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER: "+files.get(finalI1).getName(),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
+                if (status == -1) {
+                    int finalI1 = 0;
+                    NetworkShare.this.runOnUiThread(() -> Toast.makeText(NetworkShare.this,
+                            "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER: " + files.get(finalI1).getName(),
+                            Toast.LENGTH_LONG).show());
                 }
-                //should i close the dataoutputstream here and make a new one each time?
+            }
+            else {
+                dos.writeInt(files.size());
+                Log.d(TAG, "File Size (dos.writeLong) : " + files.size());
+                dos.flush();
+                //write file names
+                for (int i = 0; i < files.size(); i++) {
+                    dos.writeUTF(files.get(i).getName());
+                    dos.flush();
+                }
+                //write file sizes
+                for (int i = 0; i < files.size(); i++) {
+                    dos.writeLong(files.get(i).length());
+                    System.out.println("File SIZE is : " + files.get(i).length());
+                    dos.flush();
+                }
+                for (int i = 0; i < files.size(); i++) {
+                    String secCheck = md5File(files.get(i));
+                    byte[] data = secCheck.getBytes(StandardCharsets.UTF_8);
+                    dos.writeInt(data.length);
+                    dos.write(data);
+                    dos.flush();
+                }
+                //buffer for file writing, to declare inside or outside loop?
+                int n;
+                byte[] buf = new byte[4092];
+                //outer loop, executes one for each file
+                for (int i = 0; i < files.size(); i++) {
+                    System.out.println(files.get(i).length());
+                    System.out.println(files.get(i).getName());
+                    //create new fileinputstream for each file
+                    FileInputStream fis = new FileInputStream(files.get(i));
+                    //write file to dos
+                    while ((n = fis.read(buf)) != -1) {
+                        dos.write(buf, 0, n);
+                        dos.flush();
+
+                    }
+                    int status;
+                    status = dis.readInt();
+                    if (status == 1) {
+                        int finalI = i;
+                        NetworkShare.this.runOnUiThread(() -> Toast.makeText(NetworkShare.this,
+                                "FILE WAS TRANSFERRED SUCCESSFULLY: " + files.get(finalI).getName(),
+                                Toast.LENGTH_LONG).show());
+                    }
+                    if (status == -1) {
+                        int finalI1 = i;
+                        NetworkShare.this.runOnUiThread(() -> Toast.makeText(NetworkShare.this,
+                                "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER: " + files.get(finalI1).getName(),
+                                Toast.LENGTH_LONG).show());
+                    }
+                    //should i close the dataoutputstream here and make a new one each time?
+                }
+                dos.close();
             }
             //or is this good?
-            dos.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }finally {
             try{
