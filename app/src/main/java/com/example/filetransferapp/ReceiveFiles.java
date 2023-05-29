@@ -76,11 +76,11 @@ public class ReceiveFiles extends AppCompatActivity {
             Toast.makeText(ReceiveFiles.this,
                     "WAITING FOR HOST!!!!",
                     Toast.LENGTH_LONG).show();
-                ClientRxThread clientRxThread =
-                        new ClientRxThread(
-                                SERVER_PORT);
-                clientRxThread.start();
-            });
+            ClientRxThread clientRxThread =
+                    new ClientRxThread(
+                            SERVER_PORT);
+            clientRxThread.start();
+        });
         integrityCheck.setOnClickListener(v->{
             for(int i=0;i<files.size();i++)
             {
@@ -88,14 +88,14 @@ public class ReceiveFiles extends AppCompatActivity {
                     if(fileMd5[i].equals(md5File(files.get(i))))
                     {
                         Toast.makeText(ReceiveFiles.this,
-                                        "FILE INTEGRITY OF : "+files.get(i)+" IS VERIFIED !!!!",
-                                        Toast.LENGTH_LONG).show();
+                                "FILE INTEGRITY OF : "+files.get(i)+" IS VERIFIED !!!!",
+                                Toast.LENGTH_LONG).show();
                     }
                     else
                     {
                         Toast.makeText(ReceiveFiles.this,
-                                        "FILE : "+files.get(i)+" IS CORRUPT!!!!",
-                                        Toast.LENGTH_LONG).show();
+                                "FILE : "+files.get(i)+" IS CORRUPT!!!!",
+                                Toast.LENGTH_LONG).show();
                     }
                     System.out.println(Arrays.toString(fileMd5));
                 } catch (IOException e) {
@@ -216,95 +216,95 @@ public class ReceiveFiles extends AppCompatActivity {
             byte[]buf = new byte[4092];
             //outer loop, executes one for each file
             for(int i = 0; i < files.size();i++){
-                    int finalI = i;
-                    System.out.println("Receiving file: " + files.get(i).getName());
-                    //create a new fileoutputstream for each new file
-                    //String filename = dis.readUTF();
-                    // System.out.println("UTF File name is : "+dis.readUTF());
-                    //System.out.println("FILE SIZES : "+fileSize);
-                    File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), files.get(i).getName());
-                    //in.createNewFile();
-                    if (in.exists()) {
-                        ReceiveFiles.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(ReceiveFiles.this);
-                                // Set the message show for the Alert time
-                                builder.setMessage("FILE ALREADY EXISTS!!! (DO YOU WANT TO CONTINUE?) -------- FILE IS : "+in.getName());
-                                // Set Alert Title
-                                builder.setTitle("Alert !");
-                                // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
-                                builder.setCancelable(false);
-                                // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
-                                builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
-                                    // When the user click yes button then app will close
-                                    status =1;
-                                    dialog.cancel();
-                                });
-                                // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
-                                builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
-                                    // If user click no then dialog box is canceled.
-                                    status=-1;
-                                    dialog.cancel();
-                                });
-
-                                // Create the Alert dialog
-                                AlertDialog alertDialog = builder.create();
-                                // Show the Alert Dialog box
-                                alertDialog.show();
-                            }
-                        });
-                    } else {
-                        ReceiveFiles.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(ReceiveFiles.this,
-                                        "FILE DOES NOT EXIST , Creating New File!!",
-                                        Toast.LENGTH_LONG).show();
-                            }
-                        });
-                        in.createNewFile();
-                    }
-                    if(status!=-1){
+                int finalI = i;
+                System.out.println("Receiving file: " + files.get(i).getName());
+                //create a new fileoutputstream for each new file
+                //String filename = dis.readUTF();
+                // System.out.println("UTF File name is : "+dis.readUTF());
+                //System.out.println("FILE SIZES : "+fileSize);
+                File in = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), files.get(i).getName());
+                //in.createNewFile();
+                if (in.exists()) {
                     ReceiveFiles.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ReceiveFiles.this,
-                                "FILE RECEIVING IS : " + files.get(finalI).getName(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                    });}
-                    if(status!=-1) {
-                        FileOutputStream fos = new FileOutputStream(in);
-                        //read file
-                        while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int) Math.min(buf.length, FileSize[i]))) != -1) {
-                            fos.write(buf, 0, n);
-                            FileSize[i] -= n;
-                            ReceiveFiles.this.runOnUiThread(new Runnable() {
-                                @SuppressLint("SetTextI18n")
-                                @Override
-                                public void run() {
-                                    TextView fileName = findViewById(R.id.file_name_text_view);
-                                    fileName.setText("File currently transferring is : "+in.getName());
-                                }});
-                            if (FileSize[i] == 0 || FileSize[i] < 0)
-                                break;
+                        @Override
+                        public void run() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ReceiveFiles.this);
+                            // Set the message show for the Alert time
+                            builder.setMessage("FILE ALREADY EXISTS!!! (DO YOU WANT TO CONTINUE?) -------- FILE IS : "+in.getName());
+                            // Set Alert Title
+                            builder.setTitle("Alert !");
+                            // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+                            builder.setCancelable(false);
+                            // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
+                            builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
+                                // When the user click yes button then app will close
+                                status =1;
+                                dialog.cancel();
+                            });
+                            // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
+                            builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                                // If user click no then dialog box is canceled.
+                                status=-1;
+                                dialog.cancel();
+                            });
+
+                            // Create the Alert dialog
+                            AlertDialog alertDialog = builder.create();
+                            // Show the Alert Dialog box
+                            alertDialog.show();
                         }
-                        if(md5File(in).equals(fileMd5[i]))
-                        {
-                                stat = 1;
-                                dos.writeInt(stat);
-                                dos.flush();
+                    });
+                } else {
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "FILE DOES NOT EXIST , Creating New File!!",
+                                    Toast.LENGTH_LONG).show();
                         }
-                        else
-                        {
-                            stat = -1;
-                            dos.writeInt(stat);
-                            dos.flush();
-                        }
-                    fos.close();
-                    }
+                    });
+                    in.createNewFile();
                 }
+                if(status!=-1){
+                    ReceiveFiles.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ReceiveFiles.this,
+                                    "FILE RECEIVING IS : " + files.get(finalI).getName(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });}
+                if(status!=-1) {
+                    FileOutputStream fos = new FileOutputStream(in);
+                    //read file
+                    while (FileSize[i] >= 0 && (n = dis.read(buf, 0, (int) Math.min(buf.length, FileSize[i]))) != -1) {
+                        fos.write(buf, 0, n);
+                        FileSize[i] -= n;
+                        ReceiveFiles.this.runOnUiThread(new Runnable() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void run() {
+                                TextView fileName = findViewById(R.id.file_name_text_view);
+                                fileName.setText("File currently transferring is : "+in.getName());
+                            }});
+                        if (FileSize[i] == 0 || FileSize[i] < 0)
+                            break;
+                    }
+                    if(md5File(in).equals(fileMd5[i]))
+                    {
+                        stat = 1;
+                        dos.writeInt(stat);
+                        dos.flush();
+                    }
+                    else
+                    {
+                        stat = -1;
+                        dos.writeInt(stat);
+                        dos.flush();
+                    }
+                    fos.close();
+                }
+            }
         } catch (EOFException ignore) {
             // TODO Auto-generated catch block
 
@@ -319,8 +319,8 @@ public class ReceiveFiles extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }});
             try{socket.shutdownInput();
-            socket.shutdownOutput();
-            socket.close();}catch (IOException e)
+                socket.shutdownOutput();
+                socket.close();}catch (IOException e)
             {
                 e.printStackTrace();
             }
