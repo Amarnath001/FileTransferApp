@@ -401,39 +401,6 @@ public class NetworkShare extends AppCompatActivity {
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             //System.out.println(files.size());
             //write the number of files to the server
-            if(files.size()==1){
-                int n;
-                byte[] buf = new byte[4092];
-                dos.writeInt(files.size());
-                dos.writeUTF(files.get(0).getName());
-                dos.writeLong(files.get(0).length());
-                System.out.println("File SIZE is : " + files.get(0).length());
-                String secCheck = md5File(files.get(0));
-                byte[] data = secCheck.getBytes(StandardCharsets.UTF_8);
-                dos.writeInt(data.length);
-                dos.write(data);
-                FileInputStream fis = new FileInputStream(files.get(0));
-                //write file to dos
-                while ((n = fis.read(buf)) != -1) {
-                    dos.write(buf, 0, n);
-                }
-                dos.flush();
-                int status;
-                status = dis.readInt();
-                if (status == 1) {
-                    int finalI = 0;
-                    NetworkShare.this.runOnUiThread(() -> Toast.makeText(NetworkShare.this,
-                            "FILE WAS TRANSFERRED SUCCESSFULLY: " + files.get(finalI).getName(),
-                            Toast.LENGTH_LONG).show());
-                }
-                if (status == -1) {
-                    int finalI1 = 0;
-                    NetworkShare.this.runOnUiThread(() -> Toast.makeText(NetworkShare.this,
-                            "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER: " + files.get(finalI1).getName(),
-                            Toast.LENGTH_LONG).show());
-                }
-            }
-            else {
                 dos.writeInt(files.size());
                 Log.d(TAG, "File Size (dos.writeLong) : " + files.size());
                 dos.flush();
@@ -485,7 +452,6 @@ public class NetworkShare extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show());
                     }
                     //should i close the dataoutputstream here and make a new one each time?
-                }
                 dos.close();
             }
             //or is this good?
