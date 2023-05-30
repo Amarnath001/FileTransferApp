@@ -57,17 +57,17 @@ public class ReceiveFiles extends AppCompatActivity {
         Log.w("before","Logcat save");
         try {
             boolean st;
-            Process process = Runtime.getRuntime().exec("logcat");
+            Process process = Runtime.getRuntime().exec("logcat -d");
             verifyStoragePermissions(this);
             File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"RecFileLog.txt");
             if(!file.exists()) {
                 st = file.createNewFile();
-                process = Runtime.getRuntime().exec( "logcat" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"/RecFileLog.txt");
+                process = Runtime.getRuntime().exec( "logcat -f" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"/RecFileLog.txt");
                 Toast.makeText(ReceiveFiles.this,"Log File does not exist , Creating new one !!"+st,Toast.LENGTH_LONG).show();
             }
             else{
                 Toast.makeText(ReceiveFiles.this,"Log File already exists writing into it!!",Toast.LENGTH_LONG).show();
-                process = Runtime.getRuntime().exec( "logcat" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"/RecFileLog.txt");
+                process = Runtime.getRuntime().exec( "logcat -f"+Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"/RecFileLog.txt");
             }
         }catch(Exception e)
         {
