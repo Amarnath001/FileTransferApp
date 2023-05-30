@@ -36,7 +36,6 @@ public class ReceiveFiles extends AppCompatActivity {
     ArrayList<File>files;
     ServerSocket ss;
     Rectransfer rectransfer;
-    Process process;
     public static final int SERVER_PORT = 8080;
     int status =0;
     public static String TAG = "Receive Files : ";
@@ -58,17 +57,18 @@ public class ReceiveFiles extends AppCompatActivity {
         Log.w("before","Logcat save");
         try {
             boolean st;
-            process = Runtime.getRuntime().exec("logcat");
+            Process process = Runtime.getRuntime().exec("logcat");
             verifyStoragePermissions(this);
             File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"RecFileLog.txt");
             if(!file.exists()) {
                 st = file.createNewFile();
+                process = Runtime.getRuntime().exec( "logcat" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"RecFileLog.txt");
                 Toast.makeText(ReceiveFiles.this,"Log File does not exist , Creating new one !!"+st,Toast.LENGTH_LONG).show();
             }
             else{
                 Toast.makeText(ReceiveFiles.this,"Log File already exists writing into it!!",Toast.LENGTH_LONG).show();
+                process = Runtime.getRuntime().exec( "logcat" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"RecFileLog.txt");
             }
-            process = Runtime.getRuntime().exec( "logcat -f " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"RecFileLog.txt");
         }catch(Exception e)
         {
             e.printStackTrace();

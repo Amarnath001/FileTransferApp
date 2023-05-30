@@ -53,7 +53,6 @@ public class NetworkShare extends AppCompatActivity {
     String NetIp;
     String Md5file;
     String dstAddress;
-    Process process;
     static final int SocketServerPORT = 8080;
     public static Uri urt;
     ipTransfer IpTransferThread;
@@ -181,17 +180,18 @@ public class NetworkShare extends AppCompatActivity {
         verifyStoragePermissions(NetworkShare.this);
         Log.w("before","Logcat save");
         try {
-            process = Runtime.getRuntime().exec("logcat");
+            Process process = Runtime.getRuntime().exec("logcat");
             verifyStoragePermissions(this);
             File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"NetworkShareLog.txt");
             if(!file.exists()) {
                 Toast.makeText(NetworkShare.this,"Log File does not exist , Creating new one !!",Toast.LENGTH_LONG).show();
                 file.createNewFile();
+                process = Runtime.getRuntime().exec( "logcat" +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"NetworkShareLog.txt"));
             }
             else{
+                process = Runtime.getRuntime().exec( "logcat" +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"NetworkShareLog.txt"));
                 Toast.makeText(NetworkShare.this,"Log File already exists writing into it!!",Toast.LENGTH_LONG).show();
             }
-            process = Runtime.getRuntime().exec( "logcat -f " +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"NetworkShareLog.txt"));
         }catch(Exception e)
         {
             e.printStackTrace();
