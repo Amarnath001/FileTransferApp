@@ -245,8 +245,6 @@ public class NetworkShare extends AppCompatActivity {
             {
                 FileList.clear();
                 for(int i=0; i<data.getClipData().getItemCount();i++) {
-                    //Intent is = data.getClipData().getItemAt(i).getIntent();
-                    //fileNames = data.getData().getPath();
                     Uri uri = data.getClipData().getItemAt(i).getUri();
                     fileNames += getFileName(uri) + ",  ";
                     try {
@@ -258,13 +256,10 @@ public class NetworkShare extends AppCompatActivity {
                         AssetFileDescriptor fileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri, "r");
                         totalFileSize += fileDescriptor.getLength();
                     }
-                    //System.out.println("FILENAMES ARE : "+fileNames);
-                    //fileTxThread.setUri(uri);
                     catch (Exception e) {
                         Log.d(TAG, "ERROR IN ON ACTIVITY RESULT");
                     }
                     urt = uri;
-                    //uri = getFilePathFromUri(uri);
                     File file = new File(urt.getPath());
                     FileList.add(file);
                     try {
@@ -348,18 +343,9 @@ public class NetworkShare extends AppCompatActivity {
         file.createNewFile();
         try (OutputStream outputStream = new FileOutputStream(file);
              InputStream inputStream = NetworkShare.this.getContentResolver().openInputStream(uri)) {
-            FileUtils.copy(inputStream, outputStream); //Simply reads input to output stream
+            FileUtils.copy(inputStream, outputStream);
             outputStream.flush();
         }
-
-        /*File sdCard = Environment.getExternalStorageDirectory();
-        File dir = new File(sdCard.getAbsolutePath() + "/dir1/dir2");
-        dir.mkdirs();
-        File file1 = new File(dir, fileName);
-        try (FileOutputStream f = new FileOutputStream(file1);
-             InputStream inputStream = NetworkShare.this.getContentResolver().openInputStream(uri)) {
-            FileUtils.copy(inputStream, f);
-            f.flush();*/
             return Uri.fromFile(file);
         }
     public String setSize(long FileLength)
