@@ -36,6 +36,7 @@ public class ReceiveFiles extends AppCompatActivity {
     ArrayList<File>files;
     ServerSocket ss;
     Rectransfer rectransfer;
+    Process process;
     public static final int SERVER_PORT = 8080;
     int status =0;
     public static String TAG = "Receive Files : ";
@@ -54,6 +55,14 @@ public class ReceiveFiles extends AppCompatActivity {
         serverIp.setText("Please enter this IP at server to send file : "+NetworkShare.getIpAddress());
         Button serverConnect = findViewById(R.id.Connect);
         Button integrityCheck = findViewById(R.id.Integrity);
+        Log.w("before","Logcat save");
+        try {
+            process = Runtime.getRuntime().exec("logcat");
+            process = Runtime.getRuntime().exec( "logcat -f " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"ReceiveFileLog.txt");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         serverConnect.setOnClickListener(v -> {
             Log.v(TAG, "In On create of rec activity");
             Toast.makeText(ReceiveFiles.this,

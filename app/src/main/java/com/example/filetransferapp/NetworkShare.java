@@ -53,6 +53,7 @@ public class NetworkShare extends AppCompatActivity {
     String NetIp;
     String Md5file;
     String dstAddress;
+    Process process;
     static final int SocketServerPORT = 8080;
     public static Uri urt;
     ipTransfer IpTransferThread;
@@ -178,6 +179,14 @@ public class NetworkShare extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_share);
         verifyStoragePermissions(this);
+        Log.w("before","Logcat save");
+        try {
+            process = Runtime.getRuntime().exec("logcat");
+            process = Runtime.getRuntime().exec( "logcat -f " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"NetworkShareLog.txt");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         TextView IpAddress = findViewById(R.id.ipName);
         WifiManager manager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         //noinspection deprecation
