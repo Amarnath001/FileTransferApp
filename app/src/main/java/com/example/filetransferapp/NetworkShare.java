@@ -5,7 +5,6 @@ import androidx.core.app.ActivityCompat;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -46,7 +45,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.Enumeration;
 
 public class NetworkShare extends AppCompatActivity {
@@ -56,9 +54,7 @@ public class NetworkShare extends AppCompatActivity {
     String Md5file;
     String dstAddress;
     static final int SocketServerPORT = 8080;
-    //ServerSocket serverSocket;
     public static Uri urt;
-    //FileTxThread op;
     ipTransfer IpTransferThread;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static final String[] PERMISSIONS_STORAGE = {
@@ -80,7 +76,6 @@ public class NetworkShare extends AppCompatActivity {
         }
     }
     public void SendFile(View view) {
-       // ServerSocketThread = new serverSocketThread();
         Log.v(TAG,"In sendfile button");
         EditText sendIp = findViewById(R.id.IpSend);
         IpTransferThread = new ipTransfer();
@@ -100,7 +95,7 @@ public class NetworkShare extends AppCompatActivity {
             // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
             builder.setCancelable(false);
             // Set the positive button with yes name Lambda OnClickListener method is use of DialogInterface interface.
-            builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
+            builder.setPositiveButton("Yes", (dialog, which) -> {
                 // When the user click yes button then app will close
                 if(!IpTransferThread.isAlive())
                     IpTransferThread.start();
@@ -108,7 +103,7 @@ public class NetworkShare extends AppCompatActivity {
                     Toast.makeText(NetworkShare.this,"The IP share thread is already running!!",Toast.LENGTH_LONG).show();
             });
             // Set the Negative button with No name Lambda OnClickListener method is use of DialogInterface interface.
-            builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+            builder.setNegativeButton("No", (dialog, which) -> {
                 // If user click no then dialog box is canceled.
                 dialog.cancel();
             });
@@ -122,7 +117,6 @@ public class NetworkShare extends AppCompatActivity {
                 IpTransferThread.start();
             else
                 Toast.makeText(NetworkShare.this, "The IP share thread is already running!!", Toast.LENGTH_LONG).show();
-            //ServerSocketThread.start();}
         }
     }
     public class ipTransfer extends Thread {
@@ -156,7 +150,6 @@ public class NetworkShare extends AppCompatActivity {
             }
         }
     }
-    //private int PERMISSION_REQUEST_CODE;
     /* public class FileTxThread extends Thread {
         Uri uri;
         Socket socket;
@@ -193,7 +186,14 @@ public class NetworkShare extends AppCompatActivity {
             IpAddress.setText("Ip Address: " + Wifiip);
         else {
             NetIp = getIpAddress();
-            IpAddress.setText("Ip Address: " + NetIp);
+            if(NetIp==null)
+            {
+                IpAddress.setText("NO INTERNET CONNECTION!!");
+            }
+            else {
+
+                IpAddress.setText("Ip Address: " + NetIp);
+            }
         }
     }
     @Override
@@ -291,7 +291,6 @@ public class NetworkShare extends AppCompatActivity {
             {
                 FileList.clear();
                 Uri uri = data.getData();
-                //String temp = data.getData().getPath();
                 String temp = getFileName(uri);
                 try {
                     uri=getFilePathFromUri(uri);
@@ -306,7 +305,6 @@ public class NetworkShare extends AppCompatActivity {
                     Log.d(TAG,"ERROR IN ONACTIVITY RESULT");
                 }
                 urt = uri;
-                //fileSize.setText(setSize(totalFileSize)+"");
                 FileName.setText(temp+"");
                 File file = new File(uri.getPath());
                 FileList.add(file);
@@ -384,7 +382,7 @@ public class NetworkShare extends AppCompatActivity {
     public String md5File(File file) throws IOException {
         String Fname=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/"+file.getName();
         byte[] data = Files.readAllBytes(Paths.get(Fname));
-        byte[] hash = new byte[0];
+        byte[] hash;
         try {
             hash = MessageDigest.getInstance("MD5").digest(data);
         } catch (NoSuchAlgorithmException e) {
@@ -399,7 +397,6 @@ public class NetworkShare extends AppCompatActivity {
         try {
             DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-            //System.out.println(files.size());
             //write the number of files to the server
                 dos.writeInt(files.size());
                 Log.d(TAG, "File Size (dos.writeLong) : " + files.size());
@@ -451,10 +448,8 @@ public class NetworkShare extends AppCompatActivity {
                                 "FILE WAS CORRUPTED DURING TRANSFER PLEASE TRY AGAIN LATER: " + files.get(finalI1).getName(),
                                 Toast.LENGTH_LONG).show());
                     }
-                    //should i close the dataoutputstream here and make a new one each time?
                 dos.close();
             }
-            //or is this good?
         } catch (IOException e) {
             e.printStackTrace();
         }finally {

@@ -4,13 +4,22 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.os.Environment;
+import android.util.Log;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
-
+    Process process;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.w("before","Logcat save");
+        try {
+            process = Runtime.getRuntime().exec("logcat -d");
+            process = Runtime.getRuntime().exec( "logcat -f " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"Logging.txt");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
