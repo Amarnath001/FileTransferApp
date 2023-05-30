@@ -60,7 +60,7 @@ public class ReceiveFiles extends AppCompatActivity {
             boolean st;
             process = Runtime.getRuntime().exec("logcat");
             verifyStoragePermissions(this);
-            File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"RecFileLog.txt");
+            File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"RecFileLog.txt");
             if(!file.exists()) {
                 st = file.createNewFile();
                 Toast.makeText(ReceiveFiles.this,"Log File does not exist , Creating new one !!"+st,Toast.LENGTH_LONG).show();
