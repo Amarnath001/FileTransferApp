@@ -178,11 +178,12 @@ public class NetworkShare extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_share);
-        verifyStoragePermissions(this);
+        verifyStoragePermissions(NetworkShare.this);
         Log.w("before","Logcat save");
         try {
             boolean st;
             process = Runtime.getRuntime().exec("logcat");
+            verifyStoragePermissions(this);
             File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"NetworkShareLog.txt");
             if(!file.exists()) {
                 st = file.createNewFile();

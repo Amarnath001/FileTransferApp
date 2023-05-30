@@ -59,6 +59,7 @@ public class ReceiveFiles extends AppCompatActivity {
         try {
             boolean st;
             process = Runtime.getRuntime().exec("logcat");
+            verifyStoragePermissions(this);
             File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +"RecFileLog.txt");
             if(!file.exists()) {
                 st = file.createNewFile();
