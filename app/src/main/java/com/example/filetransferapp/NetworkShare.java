@@ -186,10 +186,10 @@ public class NetworkShare extends AppCompatActivity {
             if(!file.exists()) {
                 Toast.makeText(NetworkShare.this,"Log File does not exist , Creating new one !!",Toast.LENGTH_LONG).show();
                 file.createNewFile();
-                process = Runtime.getRuntime().exec( "logcat" +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"NetworkShareLog.txt"));
+                process = Runtime.getRuntime().exec( "logcat" +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/NetworkShareLog.txt"));
             }
             else{
-                process = Runtime.getRuntime().exec( "logcat" +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"NetworkShareLog.txt"));
+                process = Runtime.getRuntime().exec( "logcat" +(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/NetworkShareLog.txt"));
                 Toast.makeText(NetworkShare.this,"Log File already exists writing into it!!",Toast.LENGTH_LONG).show();
             }
         }catch(Exception e)
