@@ -150,28 +150,7 @@ public class NetworkShare extends AppCompatActivity {
             }
         }
     }
-    /* public class FileTxThread extends Thread {
-        Uri uri;
-        Socket socket;
-        ArrayList<File> ftlist = new ArrayList<>();
-        FileTxThread(Socket socket,Uri uri)
-        {
-            Log.v(TAG,"Got socket info: "+socket);
-            this.socket=socket;
-            this.uri=uri;
-        }
-        FileTxThread(Socket socket,ArrayList<File> ft)
-        {
-            this.socket=socket;
-            ftlist.addAll(ft);
-        }
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        @Override
-        public void run() {
-            Log.v(TAG,"In FileTXthread run!!!");
-            send(ftlist,socket);
-        }
-    }*/
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
